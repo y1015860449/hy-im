@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package im.app;
+
+enum ImCmd {
+  cmd_unknown = 0x0;
+  cmd_heartbeat = 0x0001;
+  cmd_heartbeat_ack = 0x0002;
+
+  cmd_login = 0x0801;
+  cmd_login_ack = 0x0802;
+  cmd_logout = 0x0803;
+  cmd_logout_ack = 0x0804;
+  cmd_kick_out = 0x0806;
+
+  cmd_room_msg = 0x1001;
+  cmd_room_msg_ack = 0x1002;
+  cmd_room_msg_deliver = 0x1004;
+  cmd_room_msg_deliver_ack = 0x1003;
+  cmd_room_msg_read = 0x1005;
+  cmd_room_msg_read_ack = 0x1006;
+  cmd_room_msg_read_deliver = 0x1008;
+  cmd_room_msg_read_deliver_ack = 0x1007;
+
+}
+
+enum ImErrCode {
+  err_unknown = 0;
+  err_success = 0xF000;
+
+  err_server_except = 0xF001;         // 服务器异常
+  err_param_except = 0xF002;          // 参数异常
+  err_msg_empty = 0xF003;             // 空消息
+  err_msg_except = 0xF004;            // 消息异常
+  err_user_written_off = 0xF005;      // 用户注销
+  err_user_freeze = 0xF006;           // 用户冻结
+  err_user_except = 0xF007;           // 用户账号异常
+
+  err_login_auth = 0xF101;
+  err_login_kick_out = 0xF102;
+}

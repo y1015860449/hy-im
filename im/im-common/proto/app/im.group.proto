@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package im.app;
+
+message groupMsg {
+  int64 groupId = 1;    // 群组Id
+  int32 priority = 2;   // 优先级
+  int64 fromId = 3;     // 发送者
+  string msgId = 4;     // 消息ID-全局唯一
+  string serverId = 5;  // 服务端生成的消息ID-顺序递增且全局唯一
+  int32 encrypt = 6;    // 加密类型 0 不加密 1 base64 2 AES  3 RSA
+  bytes content = 7;    // 消息内容
+  int64 timestamp = 8;  // 发送时间
+  int32 atCount = 9;    // -1:表示@all
+  repeated int64 atUsers = 10;  // @的成员
+  bytes extend = 11;     // 扩展字段
+}
+
+message groupAck {
+  int64 groupId = 1;
+  int64 userId = 2;
+  string msgId = 3;
+  string serverId = 4;
+  int64 timestamp = 5;
+  int32 errCode = 6;
+}
+
+message groupDeliverAck {
+  int64 groupId = 1;
+  int64 userId = 2;
+  string msgId = 3;
+  string serverId = 4;
+}

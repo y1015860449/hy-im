@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package im.app;
+
+message wsMsg {
+    int32 cmd = 1;
+    bytes content = 2;
+}

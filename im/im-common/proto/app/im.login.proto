@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package im.app;
+
+message login {
+  int64 userId = 1;
+  int32 loginType = 2;
+  int32 roleType = 3;
+  string loginToken = 4;
+  string deviceToken = 5;
+  string extend = 6;
+}
+
+message loginAck {
+  int64 userId = 1;
+  int32 errCode = 2;
+  int64 timestamp = 3;
+}
+
+message kickOut {
+  int64 userId = 1;
+  int32 reasonCode = 2;
+  int64 timestamp = 3;
+}

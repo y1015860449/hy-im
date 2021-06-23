@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package im.app;
+
+message content {
+  int32 msgType = 1;
+  bytes content = 2;
+}
+
+message text {
+  string content = 1;
+}
+
+message emoji {
+  int32 emojiType = 1;
+  int32 emojiNumber = 2;   // emoji编号
+  string emojiUrl = 3;     // emoji下载地址
+}
+
+message image {
+  string url = 1;
+  int32 width = 2;
+  int32 height = 3;
+  int32 size = 4;
+  string extension = 5;
+}
+
+message file {
+  string url = 1;
+  string fileName = 2;
+  int32 size = 3;
+  string extension = 4;
+}
+
+message audio {
+  string url = 1;
+  int32 size = 2;
+}
+
+message video {
+  string url = 1;
+  int32 size = 2;
+  int32 duration = 3;
+}
+

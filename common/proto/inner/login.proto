@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package inner;
+
+message loginReq {
+  int64 userId = 1;
+  int32 loginType = 2;
+  int32 command = 3;
+  bytes content = 4;
+  string linkToken = 5;
+}
+
+message loginRsp {
+  int64 userId = 1;
+  int32 loginType = 2;
+  int32 command = 3;
+  bytes content = 4;
+  int32 svcErr = 5;
+}
+
+service ImLogin {
+  rpc Login(loginReq) returns (loginRsp);
+}

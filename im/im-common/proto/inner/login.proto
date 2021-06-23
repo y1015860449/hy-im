@@ -1,0 +1,27 @@
+// protoc --proto_path=. --micro_out=. --go_out=. *.proto
+
+syntax = "proto3";
+
+package inner;
+
+message loginReq {
+  int64 userId = 1;
+  int32 loginType = 2;
+  int32 roleType = 3;
+  int32 command = 4;
+  bytes content = 5;
+  string linkToken = 6;
+}
+
+message loginRsp {
+  int64 userId = 1;
+  int32 loginType = 2;
+  int32 roleType = 3;
+  int32 command = 4;
+  bytes content = 5;
+  int32 svcErr = 6;
+}
+
+service ImLogin {
+  rpc Login(loginReq) returns (loginRsp);
+}

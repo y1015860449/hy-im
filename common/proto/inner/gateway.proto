@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package inner;
+
+message ClientInfo {
+  int64 userId = 1;
+  int32 loginType = 2;    // 登陆类型 APP：0  PC：1
+}
+
+message PushMsgReq {
+  repeated ClientInfo clients = 1;
+  bytes content = 2;
+}
+
+message PushMsgRsp {
+  string msg = 1;
+  int32 code = 2;
+}
+
+service ImGateway {
+  rpc PushMsgToClient(PushMsgReq) returns (PushMsgRsp);
+}
