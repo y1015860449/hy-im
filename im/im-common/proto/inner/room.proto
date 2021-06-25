@@ -1,0 +1,28 @@
+// protoc --proto_path=. --micro_out=. --go_out=. *.proto
+
+syntax = "proto3";
+
+package inner;
+
+message roomReq {
+  int64 userId = 1;
+  int32 loginType = 2;
+  int32 roleType = 3;
+  int64 roomId = 4;
+  int32 command = 5;
+  bytes content = 6;
+  int32 retry = 7;
+}
+
+message roomRsp {
+  int64 userId = 1;
+  int32 loginType = 2;
+  int32 roleType = 3;
+  int32 command = 4;
+  bytes content = 5;
+  int32 svcErr = 6;
+}
+
+service ImRoom{
+  rpc Room(roomReq) returns (roomRsp);
+}

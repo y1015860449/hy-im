@@ -5,7 +5,7 @@ import (
 	"github.com/common/cache"
 	innerPt "hy-im/im/im-common/proto/inner"
 	"hy-im/im/im-room/conf"
-	"hy-im/im/im-room/dao"
+	cache2 "hy-im/im/im-room/dao/cache"
 	"hy-im/im/im-room/handler"
 	"hy-im/im/im-room/service"
 	"os"
@@ -20,7 +20,6 @@ import (
 )
 
 func Run(f string) {
-
 	c, err := conf.NewConfig(f)
 	if err != nil {
 		fmt.Printf("init config err (%v)\n", err)
@@ -75,9 +74,9 @@ func Run(f string) {
 	if err != nil {
 		log.Fatalf("init redis err (%v)", err)
 	}
-	cacheDao := dao.NewCacheOperator(hyRedis)
-	loginHandler := handler.Handler{CacheDao: cacheDao}
-	if err := innerPt.RegisterImLoginHandler(srv.Server(), &loginHandler); err != nil {
+	cacheDao := cache2.NewCacheOperator(hyRedis)
+	roomHandler := handler.Handler{CacheDao: cacheDao}
+	if err := innerPt.RegisterImRoomHandler(srv.Server(), &roomHandler); err != nil {
 		log.Fatalf("register login srv handler err (%v)", err)
 	}
 

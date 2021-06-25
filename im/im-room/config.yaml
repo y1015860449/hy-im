@@ -34,7 +34,6 @@ kafka:
   addrs:
     - "192.168.10.148:9092"
 
-
 #redis
 redis:
   addrs: "192.168.10.148:6379"
@@ -42,6 +41,9 @@ redis:
   maxidleconns: 1024
   maxopenconns: 0
   maxlifetime: 100
+
+mongodb:
+  uir: "mongodb://127.0.0.1:27017
 
 # micro注册到注册中心的配置
 micro:

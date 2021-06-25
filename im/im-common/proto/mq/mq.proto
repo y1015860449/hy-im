@@ -1,0 +1,14 @@
+// protoc -I . *.proto --go_out=.
+
+syntax = "proto3";
+
+package im.mq;
+
+
+message pushRoomMsg {
+    int32 command = 1;
+    int64 roomId = 2;
+    bytes content = 3;
+    int64 userId = 4;       // 消息的发送者id
+    int64 removeId = 5;     // 被移除的用户Id
+}

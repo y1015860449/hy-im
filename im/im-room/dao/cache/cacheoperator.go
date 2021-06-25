@@ -1,17 +1,11 @@
-package dao
+package cache
 
 import (
 	"fmt"
 	"github.com/common/cache"
 	log "github.com/sirupsen/logrus"
-	"github.com/tal-tech/go-zero/core/stores/redis"
 	"strconv"
 )
-
-func NewRedis(rdAddr, rdType string, rdPass ...string) *redis.Redis {
-	cache := redis.NewRedis(rdAddr, rdType, rdPass...)
-	return cache
-}
 
 const (
 	loginStatus = "status"
@@ -24,12 +18,12 @@ type cacheOperator struct {
 	rdCli *cache.HyRedis
 }
 
-func (c *cacheOperator) GetUserLoginInfo(userId int64, loginType int32) (*UserLoginInfo, error) {
+func (c *cacheOperator) GetUserLoginInfo(userId int64, loginType int32) (*cache2.UserLoginInfo, error) {
 	result, err := c.rdCli.HGetAll(getUserLoginInfoKey(userId, loginType))
 	if err != nil {
 		return nil, err
 	}
-	loginInfo := &UserLoginInfo{}
+	loginInfo := &cache2.UserLoginInfo{}
 	for key, value := range result {
 		switch key {
 		case loginStatus:
@@ -49,7 +43,7 @@ func (c *cacheOperator) GetUserLoginInfo(userId int64, loginType int32) (*UserLo
 	return loginInfo, nil
 }
 
-func (c *cacheOperator) SaveUserLoginInfo(userId int64, loginType int32, info *UserLoginInfo) error {
+func (c *cacheOperator) SaveUserLoginInfo(userId int64, loginType int32, info *cache2.UserLoginInfo) error {
 	fields := make(map[string]string, 0)
 	fields[loginStatus] = strconv.FormatInt(int64(info.Status), 10)
 	fields[loginToken] = info.LoginToken
@@ -62,7 +56,7 @@ func (c *cacheOperator) SetUserLoginStatus(userId int64, loginType int32, status
 	return c.rdCli.HSet(getUserLoginInfoKey(userId, loginType), loginStatus, strconv.FormatInt(int64(status), 10))
 }
 
-func NewCacheOperator(rdCli *cache.HyRedis) CacheDao {
+func NewCacheOperator(rdCli *cache.HyRedis) cache2.CacheDao {
 	return &cacheOperator{rdCli: rdCli}
 }
 

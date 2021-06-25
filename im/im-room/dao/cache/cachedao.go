@@ -1,4 +1,4 @@
-package dao
+package cache
 
 const (
 	ImUserOffline = 0

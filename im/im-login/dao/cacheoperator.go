@@ -4,14 +4,8 @@ import (
 	"fmt"
 	"github.com/common/cache"
 	log "github.com/sirupsen/logrus"
-	"github.com/tal-tech/go-zero/core/stores/redis"
 	"strconv"
 )
-
-func NewRedis(rdAddr, rdType string, rdPass ...string) *redis.Redis {
-	cache := redis.NewRedis(rdAddr, rdType, rdPass...)
-	return cache
-}
 
 const (
 	loginStatus = "status"

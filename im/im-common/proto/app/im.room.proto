@@ -2,8 +2,8 @@ syntax = "proto3";
 
 package im.app;
 
-message groupMsg {
-  int64 groupId = 1;    // 群组Id
+message roomMsg {
+  int64 roomId = 1;    // 群组Id
   int32 priority = 2;   // 优先级
   int64 fromId = 3;     // 发送者
   string msgId = 4;     // 消息ID-全局唯一
@@ -16,8 +16,8 @@ message groupMsg {
   bytes extend = 11;     // 扩展字段
 }
 
-message groupAck {
-  int64 groupId = 1;
+message roomAck {
+  int64 roomId = 1;
   int64 userId = 2;
   string msgId = 3;
   string serverId = 4;
@@ -25,9 +25,26 @@ message groupAck {
   int32 errCode = 6;
 }
 
-message groupDeliverAck {
-  int64 groupId = 1;
+message roomDeliverAck {
+  int64 roomId = 1;
   int64 userId = 2;
   string msgId = 3;
   string serverId = 4;
 }
+
+message roomOpen {
+    int64 roomId = 1;
+    int64 userId = 2;
+    string msgId = 3;
+    int64 timestamp = 4;
+    string extend = 5;
+}
+
+message roomJoin {
+    int64 roomId = 1;
+    int64 userId = 2;
+    string msgId = 3;
+    int64 timestamp = 4;
+    string extend = 5;
+}
+
