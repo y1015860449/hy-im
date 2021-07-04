@@ -8,7 +8,7 @@ import (
 	"hy-im/im/im-gateway/clientlink/tcp"
 	"hy-im/im/im-gateway/clientlink/ws"
 	"hy-im/im/im-gateway/conf"
-	imhandler "hy-im/im/im-gateway/imhandler"
+	"hy-im/im/im-gateway/imhandler"
 	"hy-im/im/im-gateway/service"
 	"os"
 	"os/signal"

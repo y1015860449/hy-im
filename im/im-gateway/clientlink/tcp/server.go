@@ -1,10 +1,10 @@
 package tcp
 
 import (
+	"github.com/Allenxuxu/gev"
 	"hy-im/im/im-gateway/clientlink/connectionmanger"
 	_interface "hy-im/im/im-gateway/clientlink/interface"
-	imHandler "hy-im/im/im-gateway/handler"
-	"github.com/Allenxuxu/gev"
+	imHandler "hy-im/im/im-gateway/imhandler"
 	"runtime"
 	"time"
 )
@@ -30,7 +30,7 @@ func (t *tcpServer) Stop() error {
 }
 
 type Options struct {
-	Addr string
+	Addr     string
 	IdleTime int
 
 	ConnManager connectionmanger.ConnectionManager
@@ -42,7 +42,7 @@ type Option func(*Options)
 
 func NewTcpServer(opt ...Option) (_interface.Server, error) {
 	opts := Options{}
-	for _, v := range opt{
+	for _, v := range opt {
 		v(&opts)
 	}
 
@@ -54,10 +54,10 @@ func NewTcpServer(opt ...Option) (_interface.Server, error) {
 		},
 		gev.Network("tcp"),
 		gev.Address(opts.Addr),
-		gev.IdleTime(time.Duration(opts.IdleTime) * time.Second),
+		gev.IdleTime(time.Duration(opts.IdleTime)*time.Second),
 		gev.NumLoops(runtime.GOMAXPROCS(-1)),
 		gev.Protocol(&protocol{}),
-		)
+	)
 	if err != nil {
 		return nil, err
 	}
