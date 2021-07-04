@@ -8,7 +8,7 @@ import (
 	"hy-im/im/im-gateway/clientlink/tcp"
 	"hy-im/im/im-gateway/clientlink/ws"
 	"hy-im/im/im-gateway/conf"
-	"hy-im/im/im-gateway/handler"
+	imhandler "hy-im/im/im-gateway/imhandler"
 	"hy-im/im/im-gateway/service"
 	"os"
 	"os/signal"
@@ -64,14 +64,20 @@ func Run(f string) {
 	// 创建 micro service
 	srv := service.NewService(c)
 
-	cl := client.DefaultClient
-	loginRpc := inner.NewImLoginService(imName.RpcImLogin, cl)
-	handler := handler.NewImHandler(func(options *handler.Options) {
-		options.LoginCli = loginRpc
-	})
 	connManger := connectionmanger.NewConnManager()
 	roomManager := connectionmanger.NewRoomConnectionManager()
-
+	cl := client.DefaultClient
+	loginRpc := inner.NewImLoginService(imName.RpcImLogin, cl)
+	roomRpc := inner.NewImRoomService(imName.RpcImRoom, cl)
+	opts := &imhandler.Options{
+		LoginCli:    loginRpc,
+		RoomCli:     roomRpc,
+		ConnManager: connManger,
+		RoomManager: roomManager,
+	}
+	handler := imhandler.NewImHandler(func(options *imhandler.Options) {
+		options = opts
+	})
 
 	tcpOpts := &tcp.Options{
 		Addr:        c.Tcp.Addr,
@@ -102,7 +108,7 @@ func Run(f string) {
 		log.Fatalf("start websocket server err(%+v)", err)
 	}
 	go func() {
-		_= wsSrv.Start()
+		_ = wsSrv.Start()
 	}()
 
 	// 运行

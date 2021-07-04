@@ -10,7 +10,7 @@ import (
 	innerPt "hy-im/im/im-common/proto/inner"
 	"hy-im/im/im-gateway/clientlink/connectionmanger"
 	"hy-im/im/im-gateway/common"
-	imHandler "hy-im/im/im-gateway/handler"
+	imHandler "hy-im/im/im-gateway/imhandler"
 )
 
 type handler struct {
@@ -57,8 +57,8 @@ func (h *handler) OnMessage(c *connection.Connection, ctx interface{}, data []by
 	switch {
 	case cmd == uint16(appPt.ImCmd_cmd_heartbeat):
 		sendMessage(c, &rcvMsg.Header, uint16(appPt.ImCmd_cmd_heartbeat_ack), nil)
-	case cmd >= uint16(appPt.ImCmd_cmd_room_msg) && cmd <= 0x3000:
-		if command, content, _, svcCode, err := h.imHandler.HandlerRoom(context.Background(), int32(rcvMsg.Header.Command), rcvMsg.Content, loginInfo); err != nil {
+	case cmd >= uint16(appPt.ImCmd_cmd_room_msg) && cmd <= 0x2000:
+		if command, content, svcCode, err := h.imHandler.HandlerRoom(context.Background(), int32(rcvMsg.Header.Command), rcvMsg.Content, loginInfo); err != nil {
 			logx.Errorf("handler chat err(%v)", err)
 		} else {
 			if svcCode != int32(innerPt.SrvErr_srv_err_success) {
@@ -93,9 +93,9 @@ func (h *handler) OnConnect(c *connection.Connection) {
 
 func sendMessage(c *connection.Connection, header *MessageHeader, command uint16, content []byte) {
 	msg := Message{
-		Header:  MessageHeader{
+		Header: MessageHeader{
 			Flags:   header.Flags,
-			AppID:  header.AppID,
+			AppID:   header.AppID,
 			Command: command,
 			BodyLen: uint32(len(content)),
 			MsgSeq:  header.MsgSeq,
@@ -111,4 +111,3 @@ func sendMessage(c *connection.Connection, header *MessageHeader, command uint16
 		logx.Errorf("response  send err (%v)", err)
 	}
 }
-

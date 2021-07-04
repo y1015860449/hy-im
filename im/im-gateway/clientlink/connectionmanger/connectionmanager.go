@@ -2,6 +2,7 @@ package connectionmanger
 
 import (
 	"hy-im/im/im-gateway/clientlink/interface"
+	"hy-im/im/im-gateway/common"
 	"sync"
 )
 
@@ -61,7 +62,7 @@ type roomManager struct {
 func (r *roomManager) AddConnection(roomId int64, key string, sender _interface.Connection) {
 	r.mtx.Lock()
 	defer r.mtx.Unlock()
-	if value, ok :=  r.roomMembers[roomId]; ok {
+	if value, ok := r.roomMembers[roomId]; ok {
 		value.Store(key, sender)
 	} else {
 		var members sync.Map
@@ -73,7 +74,7 @@ func (r *roomManager) AddConnection(roomId int64, key string, sender _interface.
 func (r *roomManager) GetConnections(roomId int64) *sync.Map {
 	r.mtx.RLock()
 	defer r.mtx.RUnlock()
-	if value, ok :=  r.roomMembers[roomId]; ok {
+	if value, ok := r.roomMembers[roomId]; ok {
 		return value
 	}
 	return nil
@@ -82,7 +83,7 @@ func (r *roomManager) GetConnections(roomId int64) *sync.Map {
 func (r *roomManager) DelConnection(roomId int64, key string) {
 	r.mtx.RLock()
 	defer r.mtx.RUnlock()
-	if value, ok :=  r.roomMembers[roomId]; ok {
+	if value, ok := r.roomMembers[roomId]; ok {
 		value.Delete(key)
 	}
 }
@@ -90,7 +91,17 @@ func (r *roomManager) DelConnection(roomId int64, key string) {
 func (r *roomManager) DelRoom(roomId int64) {
 	r.mtx.Lock()
 	defer r.mtx.Unlock()
-	delete(r.roomMembers, roomId)
+	if roomNumbers, ok := r.roomMembers[roomId]; ok {
+		roomNumbers.Range(func(key, value interface{}) bool {
+			conn := value.(_interface.Connection)
+			connCtx := conn.GetContext().(common.ConnectionCtx)
+			connCtx.RoomId = 0
+			conn.SetContext(connCtx)
+
+			return true
+		})
+		delete(r.roomMembers, roomId)
+	}
 }
 
 func NewRoomConnectionManager() RoomConnectionManager {

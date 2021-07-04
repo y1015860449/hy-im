@@ -11,12 +11,12 @@ import (
 	innerPt "hy-im/im/im-common/proto/inner"
 	"hy-im/im/im-gateway/clientlink/connectionmanger"
 	"hy-im/im/im-gateway/common"
-	imHandler "hy-im/im/im-gateway/handler"
+	imHandler "hy-im/im/im-gateway/imhandler"
 )
 
 type handler struct {
 	connManager connectionmanger.ConnectionManager
-	imHandler imHandler.ImHandler
+	imHandler   imHandler.ImHandler
 	roomManager connectionmanger.RoomConnectionManager
 }
 
@@ -26,20 +26,6 @@ func (h *handler) OnConnect(c *connection.Connection) {
 
 func (h *handler) OnMessage(c *connection.Connection, msg []byte) (ws.MessageType, []byte) {
 	logx.Infof("message %s   \n", string(msg))
-
-	//msg, err := util.PackData(ws.MessageText, msg)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//if err := c.Send(msg); err != nil {
-	//	msg, err := util.PackCloseData(err.Error())
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	//	if e := c.Send(msg); e != nil {
-	//		panic(e)
-	//	}
-	//}
 
 	var rcvMsg Message
 	if err := rcvMsg.Deserialize(msg); err != nil {
@@ -75,8 +61,8 @@ func (h *handler) OnMessage(c *connection.Connection, msg []byte) (ws.MessageTyp
 	switch {
 	case cmd == uint16(appPt.ImCmd_cmd_heartbeat):
 		sendMessage(c, uint16(appPt.ImCmd_cmd_heartbeat_ack), nil, ws.MessageBinary)
-	case cmd >= uint16(appPt.ImCmd_cmd_room_msg) && cmd <= 0x3000:
-		if command, content, _, svcCode, err := h.imHandler.HandlerRoom(context.Background(), int32(rcvMsg.Command), rcvMsg.Content, loginInfo); err != nil {
+	case cmd >= uint16(appPt.ImCmd_cmd_room_msg) && cmd <= 0x2000:
+		if command, content, svcCode, err := h.imHandler.HandlerRoom(context.Background(), int32(rcvMsg.Command), rcvMsg.Content, loginInfo); err != nil {
 			logx.Errorf("handler chat err(%v)", err)
 		} else {
 			if svcCode != int32(innerPt.SrvErr_srv_err_success) {
@@ -89,7 +75,6 @@ func (h *handler) OnMessage(c *connection.Connection, msg []byte) (ws.MessageTyp
 	default:
 		logx.Infof("did not handle command(0x%04x)", cmd)
 	}
-
 
 	return ws.MessageBinary, nil
 }
@@ -105,7 +90,6 @@ func (h *handler) OnClose(c *connection.Connection) {
 	}
 	return
 }
-
 
 func sendMessage(c *connection.Connection, command uint16, content []byte, msgType ws.MessageType) {
 	msg := Message{

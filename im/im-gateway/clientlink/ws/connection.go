@@ -1,25 +1,25 @@
 package ws
 
 import (
-	_interface "hy-im/im/im-gateway/clientlink/interface"
-	appPt "hy-im/im/im-common/proto/app"
 	"github.com/Allenxuxu/gev/connection"
 	"github.com/Allenxuxu/gev/plugins/websocket/ws"
 	"github.com/Allenxuxu/gev/plugins/websocket/ws/util"
 	"github.com/golang/protobuf/proto"
+	appPt "hy-im/im/im-common/proto/app"
+	_interface "hy-im/im/im-gateway/clientlink/interface"
 	"hy-im/im/im-gateway/common"
 )
 
 type Message struct {
-	Command uint16
-	Content []byte
-	MsgType ws.MessageType
+	Command     uint16
+	Content     []byte
+	MsgType     ws.MessageType
 	CloseReason string
 }
 
 func (m *Message) Serialize() ([]byte, error) {
 	msg := &appPt.WsMsg{
-		Cmd: int32(m.Command),
+		Cmd:     int32(m.Command),
 		Content: m.Content,
 	}
 	data, err := proto.Marshal(msg)
@@ -54,10 +54,10 @@ func (m *Message) Deserialize(data []byte) error {
 }
 
 type wsConnection struct {
-	conn *connection.Connection
-	connType int
+	conn      *connection.Connection
+	connType  int
 	loginInfo common.LoginInfo
-	ctx interface{}
+	ctx       interface{}
 }
 
 func (w *wsConnection) SetContext(ctx interface{}) {
@@ -74,10 +74,6 @@ func (w *wsConnection) GetUserId() int64 {
 
 func (w *wsConnection) GetLoginType() int32 {
 	return w.loginInfo.LoginType
-}
-
-func (w *wsConnection) GetRoleType() int32 {
-	return w.loginInfo.RoleType
 }
 
 func (w *wsConnection) ConnectionType() int {
@@ -101,8 +97,8 @@ func (w *wsConnection) Close() error {
 
 func NewWSConnection(conn *connection.Connection, connType int, info common.LoginInfo) _interface.Connection {
 	return &wsConnection{
-		conn: conn,
-		connType: connType,
+		conn:      conn,
+		connType:  connType,
 		loginInfo: info,
 	}
 }

@@ -6,7 +6,6 @@ type Connection interface {
 	ConnectionType() int
 	GetUserId() int64
 	GetLoginType() int32
-	GetRoleType() int32
 	SetContext(ctx interface{})
 	GetContext() interface{}
 	Close() error

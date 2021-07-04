@@ -1,10 +1,10 @@
 package tcp
 
 import (
-	"hy-im/im/im-gateway/clientlink/interface"
 	"encoding/binary"
 	"errors"
 	"github.com/Allenxuxu/gev/connection"
+	"hy-im/im/im-gateway/clientlink/interface"
 	"hy-im/im/im-gateway/common"
 )
 
@@ -59,10 +59,10 @@ func (m *Message) Deserialize(data []byte) error {
 }
 
 type tcpConnection struct {
-	conn *connection.Connection
-	connType int
+	conn      *connection.Connection
+	connType  int
 	loginInfo common.LoginInfo
-	ctx interface{}
+	ctx       interface{}
 }
 
 func (t *tcpConnection) SetContext(ctx interface{}) {
@@ -79,10 +79,6 @@ func (t *tcpConnection) GetUserId() int64 {
 
 func (t *tcpConnection) GetLoginType() int32 {
 	return t.loginInfo.LoginType
-}
-
-func (t *tcpConnection) GetRoleType() int32 {
-	return t.loginInfo.RoleType
 }
 
 func (t *tcpConnection) ConnectionType() int {
@@ -106,8 +102,8 @@ func (t *tcpConnection) SendData(data []byte) error {
 
 func NewTcpConnection(conn *connection.Connection, connType int, info common.LoginInfo) _interface.Connection {
 	return &tcpConnection{
-		conn: conn,
-		connType: connType,
+		conn:      conn,
+		connType:  connType,
 		loginInfo: info,
 	}
 }
