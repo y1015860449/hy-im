@@ -2,8 +2,8 @@ package dao
 
 import (
 	"fmt"
-	"github.com/common/cache"
 	log "github.com/sirupsen/logrus"
+	"github.com/y1015860449/go-tools/hyredis"
 	"strconv"
 )
 
@@ -15,7 +15,7 @@ const (
 )
 
 type cacheOperator struct {
-	rdCli *cache.HyRedis
+	rdCli *hyredis.HyRedis
 }
 
 func (c *cacheOperator) GetUserLoginInfo(userId int64, loginType int32) (*UserLoginInfo, error) {
@@ -56,7 +56,7 @@ func (c *cacheOperator) SetUserLoginStatus(userId int64, loginType int32, status
 	return c.rdCli.HSet(getUserLoginInfoKey(userId, loginType), loginStatus, strconv.FormatInt(int64(status), 10))
 }
 
-func NewCacheOperator(rdCli *cache.HyRedis) CacheDao {
+func NewCacheOperator(rdCli *hyredis.HyRedis) CacheDao {
 	return &cacheOperator{rdCli: rdCli}
 }
 

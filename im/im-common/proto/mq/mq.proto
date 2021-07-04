@@ -10,5 +10,5 @@ message pushRoomMsg {
     int64 roomId = 2;
     bytes content = 3;
     int64 userId = 4;       // 消息的发送者id
-    int64 removeId = 5;     // 被移除的用户Id
+    repeated int64 otherId = 5;     // 被移除的用户Id
 }

@@ -6,11 +6,12 @@ import (
 )
 
 type Config struct {
+	Release    bool       `yaml:"release"`
 	Log        Log        `yaml:"log"`
 	Etcd       Etcd       `yaml:"etcd"`
 	Kafka      Kafka      `yaml:"kafka"`
 	Redis      Redis      `yaml:"redis"`
-	Release    bool       `yaml:"release"`
+	Mongodb    Mongodb    `yaml:"mongodb"`
 	Trace      Trace      `yaml:"trace"`
 	Prometheus Prometheus `yaml:"prometheus"`
 	Hystrix    Hystrix    `yaml:"hystrix"`
@@ -59,6 +60,11 @@ type Redis struct {
 	MaxIdleConns int `yaml:"maxidleconns"`
 	MaxOpenConns int `yaml:"maxopenconns"`
 	MaxLifeTime  int `yaml:"maxlifetime"`
+}
+
+type Mongodb struct {
+	URI         string `yaml:"uri"`
+	MaxPoolSize uint64 `yaml:"maxPoolSize"`
 }
 
 func NewConfig(configFile string) (*Config, error) {

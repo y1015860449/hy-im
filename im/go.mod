@@ -19,7 +19,8 @@ require (
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/sirupsen/logrus v1.6.0
 	github.com/tal-tech/go-zero v1.1.7
-	golang.org/x/tools v0.0.0-20200811215021-48a8ffc5b207 // indirect
+	github.com/y1015860449/go-tools v0.0.5
+	go.mongodb.org/mongo-driver v1.5.3
 )
 
 replace google.golang.org/grpc => google.golang.org/grpc v1.26.0

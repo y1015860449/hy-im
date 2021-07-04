@@ -10,4 +10,5 @@ enum SrvErr {
   srv_err_mysql = 0x0004;     // mysql错误
   svr_err_login_auth = 0x0005;  // 登陆错误
   srv_err_param = 0x0006;     // 请求参数错误
+  srv_err_visitor = 0x0007;     // 游客身份
 }

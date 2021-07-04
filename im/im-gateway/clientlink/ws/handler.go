@@ -6,6 +6,7 @@ import (
 	"github.com/Allenxuxu/gev/connection"
 	"github.com/Allenxuxu/gev/plugins/websocket/ws"
 	"github.com/tal-tech/go-zero/core/logx"
+	"hy-im/im/im-common/base"
 	appPt "hy-im/im/im-common/proto/app"
 	innerPt "hy-im/im/im-common/proto/inner"
 	"hy-im/im/im-gateway/clientlink/connectionmanger"
@@ -54,7 +55,7 @@ func (h *handler) OnMessage(c *connection.Connection, msg []byte) (ws.MessageTyp
 		} else {
 			if command == int32(appPt.ImCmd_cmd_login_ack) && svcCode == int32(innerPt.SrvErr_srv_err_success) {
 				c.SetContext(loginIfo)
-				h.connManager.AddConnection(fmt.Sprintf("%d:%d", loginIfo.UserId, loginIfo.LoginType), NewWSConnection(c, common.TcpConnection, loginIfo))
+				h.connManager.AddConnection(fmt.Sprintf("%d:%d", loginIfo.UserId, loginIfo.LoginType), NewWSConnection(c, base.WsConnection, loginIfo))
 				sendMessage(c, uint16(command), content, ws.MessageBinary)
 			} else {
 				sendMessage(c, uint16(command), content, ws.MessageBinary)

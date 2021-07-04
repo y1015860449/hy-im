@@ -56,6 +56,7 @@ enum ImErrCode {
   err_user_written_off = 0xF005;      // 用户注销
   err_user_freeze = 0xF006;           // 用户冻结
   err_user_except = 0xF007;           // 用户账号异常
+  err_user_visitor = 0xF008;          // 游客身份用户
 
   err_login_auth = 0xF101;
   err_login_kick_out = 0xF102;

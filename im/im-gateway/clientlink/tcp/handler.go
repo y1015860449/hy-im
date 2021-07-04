@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Allenxuxu/gev/connection"
 	"github.com/tal-tech/go-zero/core/logx"
+	"hy-im/im/im-common/base"
 	appPt "hy-im/im/im-common/proto/app"
 	innerPt "hy-im/im/im-common/proto/inner"
 	"hy-im/im/im-gateway/clientlink/connectionmanger"
@@ -37,7 +38,7 @@ func (h *handler) OnMessage(c *connection.Connection, ctx interface{}, data []by
 		} else {
 			if command == int32(appPt.ImCmd_cmd_login_ack) && svcCode == int32(innerPt.SrvErr_srv_err_success) {
 				c.SetContext(loginIfo)
-				h.connManager.AddConnection(fmt.Sprintf("%d:%d", loginIfo.UserId, loginIfo.LoginType), NewTcpConnection(c, common.TcpConnection, loginIfo))
+				h.connManager.AddConnection(fmt.Sprintf("%d:%d", loginIfo.UserId, loginIfo.LoginType), NewTcpConnection(c, base.TcpConnection, loginIfo))
 				sendMessage(c, &rcvMsg.Header, uint16(command), content)
 			} else {
 				sendMessage(c, &rcvMsg.Header, uint16(command), content)

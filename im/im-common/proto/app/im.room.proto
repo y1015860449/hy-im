@@ -2,12 +2,16 @@ syntax = "proto3";
 
 package im.app;
 
+
+/////////////////////////////////////
+// cmd_room_msg = 0x1001;
+/////////////////////////////////////
 message roomMsg {
   int64 roomId = 1;    // 群组Id
   int32 priority = 2;   // 优先级
   int64 fromId = 3;     // 发送者
-  string msgId = 4;     // 消息ID-全局唯一
-  string serverId = 5;  // 服务端生成的消息ID-顺序递增且全局唯一
+  string clientMsgId = 4;     // 消息ID-客户端唯一
+  string serverMsgId = 5;  // 服务端生成的消息ID-顺序递增且全局唯一
   int32 encrypt = 6;    // 加密类型 0 不加密 1 base64 2 AES  3 RSA
   bytes content = 7;    // 消息内容
   int64 timestamp = 8;  // 发送时间
@@ -19,8 +23,8 @@ message roomMsg {
 message roomAck {
   int64 roomId = 1;
   int64 userId = 2;
-  string msgId = 3;
-  string serverId = 4;
+  string clientMsgId = 3;
+  string serverMsgId = 4;
   int64 timestamp = 5;
   int32 errCode = 6;
 }
@@ -28,23 +32,24 @@ message roomAck {
 message roomDeliverAck {
   int64 roomId = 1;
   int64 userId = 2;
-  string msgId = 3;
-  string serverId = 4;
+  repeated string serverMsgId = 3;
 }
 
-message roomOpen {
-    int64 roomId = 1;
-    int64 userId = 2;
-    string msgId = 3;
-    int64 timestamp = 4;
-    string extend = 5;
-}
 
-message roomJoin {
+/////////////////////////////////////////////
+// cmd_room_open = 0x1005;
+// cmd_room_join = 0x1009;
+// cmd_room_remove = 0x100d;
+// cmd_room_quit = 0x10
+// cmd_room_close = 0x1015;
+////////////////////////////////////////////
+message roomOperator {
     int64 roomId = 1;
     int64 userId = 2;
-    string msgId = 3;
-    int64 timestamp = 4;
-    string extend = 5;
+    string clientMsgId = 3;
+    string serverMsgId = 4;  // 服务端生成的消息ID-顺序递增且全局唯一
+    int64 timestamp = 5;
+    string extend = 6;
+    repeated int64 otherId = 7;
 }
 

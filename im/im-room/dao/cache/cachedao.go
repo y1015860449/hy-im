@@ -14,8 +14,9 @@ type UserLoginInfo struct {
 
 
 type CacheDao interface {
-	GetUserLoginInfo(userId int64, loginType int32) (*UserLoginInfo, error)
-	SaveUserLoginInfo(userId int64, loginType int32, info *UserLoginInfo) error
-	SetUserLoginStatus(userId int64, loginType int32, status int8) error
+	GetRoomNumbers(roomId int64) (map[string]int, error)
+	AddRoomNumbers(roomId int64, members map[string]int) error
+	RemoveNumbers(roomId int64, members []string) error
+	GetRoomNumbersByRang(roomId int64, min, max interface{}, limit int) (map[string]int, error)
 }
 

@@ -2,10 +2,13 @@ package initial
 
 import (
 	"fmt"
-	"github.com/common/cache"
+	"github.com/y1015860449/go-tools/hymongodb"
+	"github.com/y1015860449/go-tools/hyredis"
+	"hy-im/im/im-common/base"
 	innerPt "hy-im/im/im-common/proto/inner"
 	"hy-im/im/im-room/conf"
-	cache2 "hy-im/im/im-room/dao/cache"
+	"hy-im/im/im-room/dao/cache"
+	"hy-im/im/im-room/dao/message"
 	"hy-im/im/im-room/handler"
 	"hy-im/im/im-room/service"
 	"os"
@@ -63,8 +66,7 @@ func Run(f string) {
 	// 创建 micro service
 	srv := service.NewService(c)
 
-
-	hyRedis, err := cache.InitRedis(&cache.RedisConfig{
+	hyRedis, err := hyredis.InitRedis(&hyredis.RedisConfig{
 		Addrs:        c.Redis.Addrs,
 		Password:     c.Redis.Password,
 		MaxIdleConns: c.Redis.MaxIdleConns,
@@ -74,8 +76,13 @@ func Run(f string) {
 	if err != nil {
 		log.Fatalf("init redis err (%v)", err)
 	}
-	cacheDao := cache2.NewCacheOperator(hyRedis)
-	roomHandler := handler.Handler{CacheDao: cacheDao}
+	hyMongo, err := hymongodb.ConnectMongoDb(c.Mongodb.URI, c.Mongodb.MaxPoolSize)
+	if err != nil {
+		log.Fatalf("init mongodb err (%v)", err)
+	}
+	msgDao := message.NewRoomMsgOperator(base.MongodbRoom, hyMongo)
+	cacheDao := cache.NewCacheOperator(hyRedis)
+	roomHandler := handler.Handler{CacheDao: cacheDao, MsgDao: msgDao}
 	if err := innerPt.RegisterImRoomHandler(srv.Server(), &roomHandler); err != nil {
 		log.Fatalf("register login srv handler err (%v)", err)
 	}

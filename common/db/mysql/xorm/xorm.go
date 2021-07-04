@@ -1,4 +1,4 @@
-package mysql
+package xorm
 
 import (
 	"fmt"
@@ -34,8 +34,10 @@ func Connect(conf *MysqlConfig) (*xorm.Engine, error) {
 	//最大保持时间
 	db.SetConnMaxLifetime(time.Duration(conf.MaxLifeTime) * time.Second)
 
-	//db.ShowSQL(conf.Debug)
-	//db.ShowExecTime(conf.Debug)
+
+	db.SetLogger(&cLog{})
+	db.ShowSQL(conf.Debug)
+	db.ShowExecTime(conf.Debug)
 	return db, err
 }
 

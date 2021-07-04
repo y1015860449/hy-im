@@ -43,7 +43,8 @@ redis:
   maxlifetime: 100
 
 mongodb:
-  uir: "mongodb://127.0.0.1:27017
+    uri: mongodb://127.0.0.1:27017
+    maxPoolSize: 100
 
 # micro注册到注册中心的配置
 micro:

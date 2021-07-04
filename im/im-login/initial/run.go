@@ -2,7 +2,6 @@ package initial
 
 import (
 	"fmt"
-	"github.com/common/cache"
 	innerPt "hy-im/im/im-common/proto/inner"
 	"hy-im/im/im-login/conf"
 	"hy-im/im/im-login/dao"
@@ -16,6 +15,7 @@ import (
 	dmServer "github.com/common/server"
 	"github.com/common/trace"
 	log "github.com/sirupsen/logrus"
+	"github.com/y1015860449/go-tools/hyredis"
 	imName "hy-im/im/im-common/name"
 )
 
@@ -64,8 +64,7 @@ func Run(f string) {
 	// 创建 micro service
 	srv := service.NewService(c)
 
-
-	hyRedis, err := cache.InitRedis(&cache.RedisConfig{
+	hyRedis, err := hyredis.InitRedis(&hyredis.RedisConfig{
 		Addrs:        c.Redis.Addrs,
 		Password:     c.Redis.Password,
 		MaxIdleConns: c.Redis.MaxIdleConns,
