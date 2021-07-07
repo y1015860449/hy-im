@@ -3,7 +3,7 @@ package handler
 import (
 	"context"
 	"github.com/golang/protobuf/proto"
-	"github.com/tal-tech/go-zero/core/logx"
+	log "github.com/sirupsen/logrus"
 	appPt "hy-im/im/im-common/proto/app"
 	innerPt "hy-im/im/im-common/proto/inner"
 	"hy-im/im/im-login/dao"
@@ -16,7 +16,7 @@ type Handler struct {
 
 func (h *Handler) Login(ctx context.Context, req *innerPt.LoginReq, rsp *innerPt.LoginRsp) error {
 	if req.Command == 0 || (req.Command != int32(appPt.ImCmd_cmd_logout) && len(req.Content) <= 0) {
-		logx.Errorf("request param except (%+v)", req)
+		log.Errorf("request param except (%+v)", req)
 		rsp.UserId = req.UserId
 		rsp.LoginType = req.LoginType
 		rsp.SvcErr = int32(innerPt.SrvErr_srv_err_param)
@@ -33,7 +33,7 @@ func (h *Handler) Login(ctx context.Context, req *innerPt.LoginReq, rsp *innerPt
 	case int32(appPt.ImCmd_cmd_logout):
 		return h.LogoutHandler(ctx, rsp, req.UserId, req.LoginType, req.LinkToken)
 	default:
-		logx.Infof("unknown command %d (%+v)", req.Command, req)
+		log.Infof("unknown command %d (%+v)", req.Command, req)
 
 	}
 	return nil
@@ -63,7 +63,7 @@ func (h *Handler) LoginHandler(ctx context.Context, rsp *innerPt.LoginRsp, in *a
 
 	loginInfo, err := h.CacheDao.GetUserLoginInfo(in.UserId, in.LoginType)
 	if err != nil {
-		logx.Errorf("get user login info err(%+v) userId %d type %d in(%+v)", err, in.UserId, in.LoginType, in)
+		log.Errorf("get user login info err(%+v) userId %d type %d in(%+v)", err, in.UserId, in.LoginType, in)
 		packLoginRsp(int32(appPt.ImErrCode_err_server_except), int32(innerPt.SrvErr_srv_err_redis))
 		return err
 	}
@@ -77,7 +77,7 @@ func (h *Handler) LoginHandler(ctx context.Context, rsp *innerPt.LoginRsp, in *a
 	loginInfo.DeviceToken = in.DeviceToken
 	loginInfo.LinkToken = linkToken
 	if err := h.CacheDao.SaveUserLoginInfo(in.UserId, in.LoginType, loginInfo); err != nil {
-		logx.Errorf("save user login info err(%+v) userId %d type %d in(%+v)", err, in.UserId, in.LoginType, in)
+		log.Errorf("save user login info err(%+v) userId %d type %d in(%+v)", err, in.UserId, in.LoginType, in)
 		packLoginRsp(int32(appPt.ImErrCode_err_server_except), int32(innerPt.SrvErr_srv_err_redis))
 		return err
 	}
@@ -97,13 +97,13 @@ func (h *Handler) LogoutHandler(ctx context.Context, rsp *innerPt.LoginRsp, user
 	}
 	loginInfo, err := h.CacheDao.GetUserLoginInfo(userId, loginType)
 	if err != nil {
-		logx.Errorf("get user login info err(%+v) userId %d type %d", err, userId, loginType)
+		log.Errorf("get user login info err(%+v) userId %d type %d", err, userId, loginType)
 		packLoginRsp(int32(innerPt.SrvErr_srv_err_redis))
 		return err
 	}
 	if loginInfo.Status == dao.ImUserOnline && loginInfo.LinkToken != linkToken {
 		if err := h.CacheDao.SetUserLoginStatus(userId, loginType, dao.ImUserOffline); err != nil {
-			logx.Errorf("set user login status err(%+v) userId %d type %d", err, userId, loginType)
+			log.Errorf("set user login status err(%+v) userId %d type %d", err, userId, loginType)
 			packLoginRsp(int32(innerPt.SrvErr_srv_err_redis))
 			return err
 		}

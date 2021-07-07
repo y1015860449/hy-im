@@ -2,7 +2,7 @@ package objid
 
 import (
 	"fmt"
-	"github.com/y1015860449/go-tools/hy-utils"
+	"github.com/y1015860449/go-tools/hy_utils"
 	"sync"
 )
 

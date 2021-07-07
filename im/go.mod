@@ -2,8 +2,6 @@ module hy-im/im
 
 go 1.16
 
-replace google.golang.org/grpc v1.28.0 => google.golang.org/grpc v1.26.0
-
 require (
 	github.com/Allenxuxu/gev v0.2.3
 	github.com/Allenxuxu/ringbuffer v0.0.9
@@ -18,8 +16,7 @@ require (
 	github.com/micro/go-plugins/wrapper/trace/opentracing/v2 v2.9.1
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/sirupsen/logrus v1.6.0
-	github.com/tal-tech/go-zero v1.1.7
-	github.com/y1015860449/go-tools v0.0.5
+	github.com/y1015860449/go-tools v0.0.6
 	go.mongodb.org/mongo-driver v1.5.3
 )
 

@@ -2,9 +2,15 @@ package initial
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
+	"github.com/y1015860449/go-tools/hy_log/hy_logrus"
+	"github.com/y1015860449/go-tools/hy_servicectrl/hy_hystrix"
+	"github.com/y1015860449/go-tools/hy_servicectrl/hy_prometheus"
+	"github.com/y1015860449/go-tools/hy_servicectrl/hy_tracer"
 	"github.com/y1015860449/go-tools/hymongodb"
 	"github.com/y1015860449/go-tools/hyredis"
 	"hy-im/im/im-common/base"
+	imName "hy-im/im/im-common/name"
 	innerPt "hy-im/im/im-common/proto/inner"
 	"hy-im/im/im-room/conf"
 	"hy-im/im/im-room/dao/cache"
@@ -14,12 +20,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-
-	dmLog "github.com/common/log"
-	dmServer "github.com/common/server"
-	"github.com/common/trace"
-	log "github.com/sirupsen/logrus"
-	imName "hy-im/im/im-common/name"
 )
 
 func Run(f string) {
@@ -31,7 +31,7 @@ func Run(f string) {
 	if !c.Release {
 		fmt.Printf("load config success (%v)\n", c)
 	}
-	if err := dmLog.InitLog(func(options *dmLog.Options) {
+	if err := hy_logrus.InitLog(func(options *hy_logrus.Options) {
 		options.FileName = c.Log.File
 		options.Release = c.Release
 		options.Level = c.Log.Level
@@ -43,19 +43,19 @@ func Run(f string) {
 	log.Infoln("init log success")
 
 	if c.Hystrix.Enable {
-		if err := dmServer.StartHystrix(c.Hystrix.Addr); err != nil {
+		if err := hy_hystrix.StartHystrix(c.Hystrix.Addr); err != nil {
 			log.Fatalf("start hystrix err (%v)", err)
 		}
 	}
 
 	if c.Prometheus.Enable {
-		if err := dmServer.StartPrometheus(c.Prometheus.Addr); err != nil {
+		if err := hy_prometheus.StartPrometheus(c.Prometheus.Addr); err != nil {
 			log.Fatalf("start prometheus err (%v)", err)
 		}
 	}
 
 	// 链路追踪
-	io, err := trace.InitTracer(imName.RpcImGateway, c.Trace.Addr)
+	io, err := hy_tracer.InitTracer(imName.RpcImGateway, c.Trace.Addr)
 	if err != nil {
 		log.Fatalf("init tracer err (%v)", err)
 	}

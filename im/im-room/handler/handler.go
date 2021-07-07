@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/golang/protobuf/proto"
 	log "github.com/sirupsen/logrus"
-	"github.com/y1015860449/go-tools/hy-utils"
+	"github.com/y1015860449/go-tools/hy_utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"hy-im/im/im-common/base"
 	"hy-im/im/im-common/objid"
