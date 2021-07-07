@@ -1,0 +1,35 @@
+# This is a YAML document.
+
+release: false
+
+# debug info warn err
+log:
+  level: debug
+  file: ./app.log
+  rotationTime: 24 #日志文件切割时间(小时)
+  maxAge: 1 #日志文件保留时长(天)
+
+# http
+http:
+  addr: ":3800"
+
+# etcd
+etcd:
+  addrs:
+    - "192.168.10.148:2379"
+
+# kafka
+kafka:
+  enable: false # 是否开启发布订阅功能,需要kafka cluster版
+  addrs:
+    - "192.168.10.148:9092"
+
+# trace
+trace:
+  addr: "192.168.10.148:6831"
+
+# micro注册到注册中心的配置
+micro:
+  registerTTL: 3 # 超时时间(秒)
+  registerInterval: 1 # 注册间隔(秒)
+  version: "latest"
