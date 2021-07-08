@@ -1,0 +1,63 @@
+# This is a YAML document.
+
+release: false
+
+# debug info err
+log:
+  level: debug
+  file: ./app.log
+  rotationTime: 24 #日志文件切割时间(小时)
+  maxAge: 1 #日志文件保留时长(天)
+
+# etcd
+etcd:
+  addrs:
+    - "192.168.10.148:2379"
+
+# trace
+trace:
+  addr: "192.168.10.148:6831"
+
+# prometheus
+prometheus:
+  enable: false
+  addr: ":8085"
+
+# hystrix 熔断dashboard,非必须,用于查看该服务的熔断情况
+hystrix:
+  enable: false
+  addr: ":81"
+
+# kafka
+kafka:
+  enable: false # 是否开启发布订阅功能,需要kafka cluster版
+  addrs:
+    - "192.168.10.148:9092"
+
+#redis
+redis:
+  addrs: "192.168.10.148:6379"
+  password: "BvbmPTa7dYhQRnca"
+  maxidleconns: 1024
+  maxopenconns: 0
+  maxlifetime: 100
+
+# mysql
+mysql:
+  hostname:
+    - "192.168.10.148"
+  database: "app"
+  username: "imadmin"
+  password: "TKqnx9o94BnOcmgw"
+  hostport: "3306"
+  rwseparate: false
+  maxidleconns: 100
+  maxopenconns: 100
+  maxlifetime: 100
+
+# micro注册到注册中心的配置
+micro:
+  registerTTL: 3 # 超时时间(秒)
+  registerInterval: 1 # 注册间隔(秒)
+  version: "latest"
+  limitRate: 5000 # 限制每秒可请求数量

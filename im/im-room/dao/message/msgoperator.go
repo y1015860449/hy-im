@@ -3,7 +3,7 @@ package message
 import (
 	"context"
 	"fmt"
-	"github.com/tal-tech/go-zero/core/logx"
+	log "github.com/sirupsen/logrus"
 	"github.com/y1015860449/go-tools/hymongodb"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -95,7 +95,7 @@ func (r *roomMsgOperator) checkCollection(collName string) (bool, error) {
 
 	has, err := r.mCli.HasCollection(r.dbName, collName)
 	if err != nil {
-		logx.Errorf("mongodb is broken")
+		log.Errorf("mongodb is broken")
 		return false, err
 	}
 	if has {

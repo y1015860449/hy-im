@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/Allenxuxu/gev/connection"
-	"github.com/tal-tech/go-zero/core/logx"
 	"hy-im/im/im-common/base"
 	appPt "hy-im/im/im-common/proto/app"
 	innerPt "hy-im/im/im-common/proto/inner"
@@ -27,14 +26,14 @@ func (h *handler) OnMessage(c *connection.Connection, ctx interface{}, data []by
 	var rcvMsg Message
 	if err := rcvMsg.Deserialize(data); err != nil {
 		// parse fail
-		logx.Errorf("except data %s", c.PeerAddr())
+		log.Errorf("except data %s", c.PeerAddr())
 		_ = c.Close()
 		return nil
 	}
 	// login msg
 	if rcvMsg.Header.Command == uint16(appPt.ImCmd_cmd_login) {
 		if command, content, loginIfo, svcCode, err := h.imHandler.HandlerLogin(context.Background(), int32(rcvMsg.Header.Command), rcvMsg.Content); err != nil {
-			logx.Errorf("handler login err(%v)", err)
+			log.Errorf("handler login err(%v)", err)
 		} else {
 			if command == int32(appPt.ImCmd_cmd_login_ack) && svcCode == int32(innerPt.SrvErr_srv_err_success) {
 				c.SetContext(loginIfo)
@@ -59,17 +58,17 @@ func (h *handler) OnMessage(c *connection.Connection, ctx interface{}, data []by
 		sendMessage(c, &rcvMsg.Header, uint16(appPt.ImCmd_cmd_heartbeat_ack), nil)
 	case cmd >= uint16(appPt.ImCmd_cmd_room_msg) && cmd <= 0x2000:
 		if command, content, svcCode, err := h.imHandler.HandlerRoom(context.Background(), int32(rcvMsg.Header.Command), rcvMsg.Content, loginInfo); err != nil {
-			logx.Errorf("handler chat err(%v)", err)
+			log.Errorf("handler chat err(%v)", err)
 		} else {
 			if svcCode != int32(innerPt.SrvErr_srv_err_success) {
-				logx.Errorf("server error code %d", svcCode)
+				log.Errorf("server error code %d", svcCode)
 			}
 			if command > 0 {
 				sendMessage(c, &rcvMsg.Header, uint16(command), content)
 			}
 		}
 	default:
-		logx.Infof("did not handle command(0x%04x)", cmd)
+		log.Infof("did not handle command(0x%04x)", cmd)
 	}
 
 	return nil
