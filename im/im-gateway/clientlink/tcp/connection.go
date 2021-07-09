@@ -8,12 +8,13 @@ import (
 	"hy-im/im/im-gateway/common"
 )
 
-const headerLen = 12
+const headerLen = 16
 
 type MessageHeader struct {
-	Flags   uint8
-	AppID   uint8
+	Flags   uint16
+	AppID   uint16
 	Command uint16
+	Retry   uint16
 	BodyLen uint32
 	MsgSeq  uint32
 }
@@ -29,11 +30,12 @@ func (m *Message) Serialize() ([]byte, error) {
 	}
 
 	data := make([]byte, headerLen)
-	data[0] = m.Header.Flags
-	data[1] = m.Header.AppID
-	binary.BigEndian.PutUint16(data[2:4], m.Header.Command)
-	binary.BigEndian.PutUint32(data[4:8], m.Header.BodyLen)
-	binary.BigEndian.PutUint32(data[8:headerLen], m.Header.MsgSeq)
+	binary.BigEndian.PutUint16(data[0:2], m.Header.Flags)
+	binary.BigEndian.PutUint16(data[2:4], m.Header.AppID)
+	binary.BigEndian.PutUint16(data[4:6], m.Header.Command)
+	binary.BigEndian.PutUint16(data[6:8], m.Header.Retry)
+	binary.BigEndian.PutUint32(data[8:12], m.Header.BodyLen)
+	binary.BigEndian.PutUint32(data[12:headerLen], m.Header.MsgSeq)
 
 	if m.Header.BodyLen > 0 {
 		data = append(data, m.Content...)
@@ -45,11 +47,12 @@ func (m *Message) Deserialize(data []byte) error {
 	if len(data) < headerLen {
 		return errors.New("data not enough")
 	}
-	m.Header.Flags = data[0]
-	m.Header.AppID = data[1]
-	m.Header.Command = binary.BigEndian.Uint16(data[2:4])
-	m.Header.BodyLen = binary.BigEndian.Uint32(data[4:8])
-	m.Header.MsgSeq = binary.BigEndian.Uint32(data[8:headerLen])
+	m.Header.Flags = binary.BigEndian.Uint16(data[0:2])
+	m.Header.AppID = binary.BigEndian.Uint16(data[2:4])
+	m.Header.Command = binary.BigEndian.Uint16(data[4:6])
+	m.Header.Retry = binary.BigEndian.Uint16(data[6:8])
+	m.Header.BodyLen = binary.BigEndian.Uint32(data[8:12])
+	m.Header.MsgSeq = binary.BigEndian.Uint32(data[12:headerLen])
 
 	if len(data[headerLen:]) != int(m.Header.BodyLen) {
 		return errors.New("content not enough")

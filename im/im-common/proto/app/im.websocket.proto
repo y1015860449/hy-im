@@ -4,5 +4,7 @@ package im.app;
 
 message wsMsg {
     int32 cmd = 1;
-    bytes content = 2;
+    int32 Retry = 2;
+    int32 seqNum = 3;
+    bytes content = 4;
 }

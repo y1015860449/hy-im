@@ -12,6 +12,8 @@ import (
 
 type Message struct {
 	Command     uint16
+	Retry       uint16
+	SeqNum      int32
 	Content     []byte
 	MsgType     ws.MessageType
 	CloseReason string
@@ -20,6 +22,8 @@ type Message struct {
 func (m *Message) Serialize() ([]byte, error) {
 	msg := &appPt.WsMsg{
 		Cmd:     int32(m.Command),
+		Retry:   int32(m.Retry),
+		SeqNum:  m.SeqNum,
 		Content: m.Content,
 	}
 	data, err := proto.Marshal(msg)
@@ -49,6 +53,8 @@ func (m *Message) Deserialize(data []byte) error {
 	}
 	m.MsgType = ws.MessageBinary
 	m.Command = uint16(msg.Cmd)
+	m.Retry = uint16(msg.Retry)
+	m.SeqNum = msg.SeqNum
 	m.Content = msg.Content
 	return nil
 }

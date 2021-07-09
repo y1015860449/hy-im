@@ -62,7 +62,7 @@ func (h *handler) OnMessage(c *connection.Connection, msg []byte) (ws.MessageTyp
 	case cmd == uint16(appPt.ImCmd_cmd_heartbeat):
 		sendMessage(c, uint16(appPt.ImCmd_cmd_heartbeat_ack), nil, ws.MessageBinary)
 	case cmd >= uint16(appPt.ImCmd_cmd_room_msg) && cmd <= 0x2000:
-		if command, content, svcCode, err := h.imHandler.HandlerRoom(context.Background(), int32(rcvMsg.Command), rcvMsg.Content, loginInfo); err != nil {
+		if command, content, svcCode, err := h.imHandler.HandlerRoom(context.Background(), int32(rcvMsg.Command), int32(rcvMsg.Retry), rcvMsg.Content, loginInfo); err != nil {
 			log.Errorf("handler chat err(%v)", err)
 		} else {
 			if svcCode != int32(innerPt.SrvErr_srv_err_success) {

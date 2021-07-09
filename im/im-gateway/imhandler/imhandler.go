@@ -13,7 +13,7 @@ import (
 type ImHandler interface {
 	HandlerLogin(ctx context.Context, command int32, content []byte) (int32, []byte, common.LoginInfo, int32, error)
 	HandlerLogout(ctx context.Context, loginInfo common.LoginInfo, linkToken string) error
-	HandlerRoom(ctx context.Context, command int32, content []byte, loginInfo common.LoginInfo) (int32, []byte, int32, error)
+	HandlerRoom(ctx context.Context, command, retry int32, content []byte, loginInfo common.LoginInfo) (int32, []byte, int32, error)
 }
 
 type imHandler struct {
@@ -61,7 +61,7 @@ func (i *imHandler) HandlerLogout(ctx context.Context, loginInfo common.LoginInf
 	return nil
 }
 
-func (i *imHandler) HandlerRoom(ctx context.Context, command int32, content []byte, loginInfo common.LoginInfo) (int32, []byte, int32, error) {
+func (i *imHandler) HandlerRoom(ctx context.Context, command, retry int32, content []byte, loginInfo common.LoginInfo) (int32, []byte, int32, error) {
 	conn := i.connManager.GetConnection(fmt.Sprintf("%d:%d", loginInfo.UserId, loginInfo.LoginType))
 	connCtx := conn.GetContext().(*common.ConnectionCtx)
 	roomReq := &innerPt.RoomReq{
@@ -70,6 +70,7 @@ func (i *imHandler) HandlerRoom(ctx context.Context, command int32, content []by
 		RoleType:  connCtx.RoleType,
 		RoomId:    connCtx.RoomId,
 		Command:   command,
+		Retry:     retry,
 		Content:   content,
 	}
 	roomRsp, err := i.roomCli.Room(ctx, roomReq)

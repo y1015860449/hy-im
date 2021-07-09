@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/Allenxuxu/gev/connection"
+	log "github.com/sirupsen/logrus"
 	"hy-im/im/im-common/base"
 	appPt "hy-im/im/im-common/proto/app"
 	innerPt "hy-im/im/im-common/proto/inner"
@@ -57,7 +58,7 @@ func (h *handler) OnMessage(c *connection.Connection, ctx interface{}, data []by
 	case cmd == uint16(appPt.ImCmd_cmd_heartbeat):
 		sendMessage(c, &rcvMsg.Header, uint16(appPt.ImCmd_cmd_heartbeat_ack), nil)
 	case cmd >= uint16(appPt.ImCmd_cmd_room_msg) && cmd <= 0x2000:
-		if command, content, svcCode, err := h.imHandler.HandlerRoom(context.Background(), int32(rcvMsg.Header.Command), rcvMsg.Content, loginInfo); err != nil {
+		if command, content, svcCode, err := h.imHandler.HandlerRoom(context.Background(), int32(rcvMsg.Header.Command), int32(rcvMsg.Header.Retry), rcvMsg.Content, loginInfo); err != nil {
 			log.Errorf("handler chat err(%v)", err)
 		} else {
 			if svcCode != int32(innerPt.SrvErr_srv_err_success) {
@@ -80,14 +81,14 @@ func (h *handler) OnClose(c *connection.Connection) {
 		err := h.imHandler.HandlerLogout(context.Background(), info, linkToken)
 		h.connManager.DelConnection(fmt.Sprintf("%d:%d", info.UserId, info.LoginType), linkToken)
 		if err != nil {
-			logx.Errorf("handler logout err(%v)", err)
+			log.Errorf("handler logout err(%v)", err)
 		}
 	}
 	return
 }
 
 func (h *handler) OnConnect(c *connection.Connection) {
-	logx.Infof("connection remote address %s", c.PeerAddr())
+	log.Infof("connection remote address %s", c.PeerAddr())
 }
 
 func sendMessage(c *connection.Connection, header *MessageHeader, command uint16, content []byte) {
@@ -103,10 +104,10 @@ func sendMessage(c *connection.Connection, header *MessageHeader, command uint16
 	}
 	body, err := msg.Serialize()
 	if err != nil {
-		logx.Errorf("response  serialize err (%v)", err)
+		log.Errorf("response  serialize err (%v)", err)
 		return
 	}
 	if err := c.Send(body); err != nil {
-		logx.Errorf("response  send err (%v)", err)
+		log.Errorf("response  send err (%v)", err)
 	}
 }
