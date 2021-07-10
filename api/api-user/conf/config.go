@@ -12,6 +12,7 @@ type Config struct {
 	Kafka      Kafka      `yaml:"kafka"`
 	Redis      Redis      `yaml:"redis"`
 	Mysql      Mysql      `yaml:"mysql"`
+	Token      Token      `yaml:"token"`
 	Trace      Trace      `yaml:"trace"`
 	Prometheus Prometheus `yaml:"prometheus"`
 	Hystrix    Hystrix    `yaml:"hystrix"`
@@ -72,6 +73,11 @@ type Mysql struct {
 	MaxIdleConns int      `yaml:"maxidleconns"`
 	MaxOpenConns int      `yaml:"maxopenconns"`
 	MaxLifeTime  int      `yaml:"maxlifetime"`
+}
+
+type Token struct {
+	ExpiredSec int64 `yaml:"expiredsec"`
+	SafetySec  int64 `yaml:"safetytsec"`
 }
 
 func NewConfig(configFile string) (*Config, error) {

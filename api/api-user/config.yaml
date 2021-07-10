@@ -55,6 +55,11 @@ mysql:
   maxopenconns: 100
   maxlifetime: 100
 
+# token
+token:
+  expiredsec: 10000
+  safetysec: 10000
+
 # micro注册到注册中心的配置
 micro:
   registerTTL: 3 # 超时时间(秒)

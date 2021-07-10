@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package inner;
+
+enum SrvErr {
+  srv_err_unknown = 0x0;
+  srv_err_success = 0x0001;   // 无错误
+  srv_err_redis = 0x0002;     // redis错误
+  srv_err_mongo = 0x0003;     // mongo错误
+  srv_err_mysql = 0x0004;     // mysql错误
+  srv_err_param = 0x0005;     // 请求参数错误
+  srv_err_account_already = 0x0006;   // 账号已存在
+  srv_err_account_not_exist = 0x0007;   // 账号不存在
+  srv_err_user_auth = 0x0008;     // 用户认证失败
+}

@@ -45,6 +45,7 @@ type ApiUserService interface {
 	Register(ctx context.Context, in *RegisterReq, opts ...client.CallOption) (*RegisterRsp, error)
 	Login(ctx context.Context, in *LoginReq, opts ...client.CallOption) (*LoginRsp, error)
 	Logout(ctx context.Context, in *LogoutReq, opts ...client.CallOption) (*LogoutRsp, error)
+	CheckToken(ctx context.Context, in *CheckTokenReq, opts ...client.CallOption) (*CheckTokenRsp, error)
 }
 
 type apiUserService struct {
@@ -89,12 +90,23 @@ func (c *apiUserService) Logout(ctx context.Context, in *LogoutReq, opts ...clie
 	return out, nil
 }
 
+func (c *apiUserService) CheckToken(ctx context.Context, in *CheckTokenReq, opts ...client.CallOption) (*CheckTokenRsp, error) {
+	req := c.c.NewRequest(c.name, "ApiUser.CheckToken", in)
+	out := new(CheckTokenRsp)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for ApiUser service
 
 type ApiUserHandler interface {
 	Register(context.Context, *RegisterReq, *RegisterRsp) error
 	Login(context.Context, *LoginReq, *LoginRsp) error
 	Logout(context.Context, *LogoutReq, *LogoutRsp) error
+	CheckToken(context.Context, *CheckTokenReq, *CheckTokenRsp) error
 }
 
 func RegisterApiUserHandler(s server.Server, hdlr ApiUserHandler, opts ...server.HandlerOption) error {
@@ -102,6 +114,7 @@ func RegisterApiUserHandler(s server.Server, hdlr ApiUserHandler, opts ...server
 		Register(ctx context.Context, in *RegisterReq, out *RegisterRsp) error
 		Login(ctx context.Context, in *LoginReq, out *LoginRsp) error
 		Logout(ctx context.Context, in *LogoutReq, out *LogoutRsp) error
+		CheckToken(ctx context.Context, in *CheckTokenReq, out *CheckTokenRsp) error
 	}
 	type ApiUser struct {
 		apiUser
@@ -124,4 +137,8 @@ func (h *apiUserHandler) Login(ctx context.Context, in *LoginReq, out *LoginRsp)
 
 func (h *apiUserHandler) Logout(ctx context.Context, in *LogoutReq, out *LogoutRsp) error {
 	return h.ApiUserHandler.Logout(ctx, in, out)
+}
+
+func (h *apiUserHandler) CheckToken(ctx context.Context, in *CheckTokenReq, out *CheckTokenRsp) error {
+	return h.ApiUserHandler.CheckToken(ctx, in, out)
 }
