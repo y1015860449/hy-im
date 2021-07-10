@@ -7,5 +7,5 @@ type LoginInfo struct {
 
 type ConnectionCtx struct {
 	RoleType int32 // 角色类型  0；游客 1：用户
-	RoomId   int64
+	GroupId  int64
 }

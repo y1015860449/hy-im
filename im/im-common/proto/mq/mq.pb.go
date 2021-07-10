@@ -20,9 +20,9 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-type PushRoomMsg struct {
+type PushGroupMsg struct {
 	Command              int32    `protobuf:"varint,1,opt,name=command,proto3" json:"command,omitempty"`
-	RoomId               int64    `protobuf:"varint,2,opt,name=roomId,proto3" json:"roomId,omitempty"`
+	GroupId              int64    `protobuf:"varint,2,opt,name=groupId,proto3" json:"groupId,omitempty"`
 	Content              []byte   `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
 	UserId               int64    `protobuf:"varint,4,opt,name=userId,proto3" json:"userId,omitempty"`
 	OtherId              []int64  `protobuf:"varint,5,rep,packed,name=otherId,proto3" json:"otherId,omitempty"`
@@ -31,60 +31,60 @@ type PushRoomMsg struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *PushRoomMsg) Reset()         { *m = PushRoomMsg{} }
-func (m *PushRoomMsg) String() string { return proto.CompactTextString(m) }
-func (*PushRoomMsg) ProtoMessage()    {}
-func (*PushRoomMsg) Descriptor() ([]byte, []int) {
+func (m *PushGroupMsg) Reset()         { *m = PushGroupMsg{} }
+func (m *PushGroupMsg) String() string { return proto.CompactTextString(m) }
+func (*PushGroupMsg) ProtoMessage()    {}
+func (*PushGroupMsg) Descriptor() ([]byte, []int) {
 	return fileDescriptor_7caa8199c0db1966, []int{0}
 }
 
-func (m *PushRoomMsg) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_PushRoomMsg.Unmarshal(m, b)
+func (m *PushGroupMsg) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PushGroupMsg.Unmarshal(m, b)
 }
-func (m *PushRoomMsg) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_PushRoomMsg.Marshal(b, m, deterministic)
+func (m *PushGroupMsg) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PushGroupMsg.Marshal(b, m, deterministic)
 }
-func (m *PushRoomMsg) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PushRoomMsg.Merge(m, src)
+func (m *PushGroupMsg) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PushGroupMsg.Merge(m, src)
 }
-func (m *PushRoomMsg) XXX_Size() int {
-	return xxx_messageInfo_PushRoomMsg.Size(m)
+func (m *PushGroupMsg) XXX_Size() int {
+	return xxx_messageInfo_PushGroupMsg.Size(m)
 }
-func (m *PushRoomMsg) XXX_DiscardUnknown() {
-	xxx_messageInfo_PushRoomMsg.DiscardUnknown(m)
+func (m *PushGroupMsg) XXX_DiscardUnknown() {
+	xxx_messageInfo_PushGroupMsg.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_PushRoomMsg proto.InternalMessageInfo
+var xxx_messageInfo_PushGroupMsg proto.InternalMessageInfo
 
-func (m *PushRoomMsg) GetCommand() int32 {
+func (m *PushGroupMsg) GetCommand() int32 {
 	if m != nil {
 		return m.Command
 	}
 	return 0
 }
 
-func (m *PushRoomMsg) GetRoomId() int64 {
+func (m *PushGroupMsg) GetGroupId() int64 {
 	if m != nil {
-		return m.RoomId
+		return m.GroupId
 	}
 	return 0
 }
 
-func (m *PushRoomMsg) GetContent() []byte {
+func (m *PushGroupMsg) GetContent() []byte {
 	if m != nil {
 		return m.Content
 	}
 	return nil
 }
 
-func (m *PushRoomMsg) GetUserId() int64 {
+func (m *PushGroupMsg) GetUserId() int64 {
 	if m != nil {
 		return m.UserId
 	}
 	return 0
 }
 
-func (m *PushRoomMsg) GetOtherId() []int64 {
+func (m *PushGroupMsg) GetOtherId() []int64 {
 	if m != nil {
 		return m.OtherId
 	}
@@ -92,21 +92,20 @@ func (m *PushRoomMsg) GetOtherId() []int64 {
 }
 
 func init() {
-	proto.RegisterType((*PushRoomMsg)(nil), "im.mq.pushRoomMsg")
+	proto.RegisterType((*PushGroupMsg)(nil), "im.mq.pushGroupMsg")
 }
 
 func init() { proto.RegisterFile("mq.proto", fileDescriptor_7caa8199c0db1966) }
 
 var fileDescriptor_7caa8199c0db1966 = []byte{
-	// 145 bytes of a gzipped FileDescriptorProto
+	// 144 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0xc8, 0x2d, 0xd4, 0x2b,
-	0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0xcd, 0xcc, 0xd5, 0xcb, 0x2d, 0x54, 0xea, 0x66, 0xe4, 0xe2,
-	0x2e, 0x28, 0x2d, 0xce, 0x08, 0xca, 0xcf, 0xcf, 0xf5, 0x2d, 0x4e, 0x17, 0x92, 0xe0, 0x62, 0x4f,
-	0xce, 0xcf, 0xcd, 0x4d, 0xcc, 0x4b, 0x91, 0x60, 0x54, 0x60, 0xd4, 0x60, 0x0d, 0x82, 0x71, 0x85,
-	0xc4, 0xb8, 0xd8, 0x8a, 0xf2, 0xf3, 0x73, 0x3d, 0x53, 0x24, 0x98, 0x14, 0x18, 0x35, 0x98, 0x83,
-	0xa0, 0x3c, 0x88, 0x8e, 0xbc, 0x92, 0xd4, 0xbc, 0x12, 0x09, 0x66, 0x05, 0x46, 0x0d, 0x9e, 0x20,
-	0x18, 0x17, 0xa4, 0xa3, 0xb4, 0x38, 0xb5, 0xc8, 0x33, 0x45, 0x82, 0x05, 0xa2, 0x03, 0xc2, 0x03,
-	0xe9, 0xc8, 0x2f, 0xc9, 0x00, 0x4b, 0xb0, 0x2a, 0x30, 0x6b, 0x30, 0x07, 0xc1, 0xb8, 0x49, 0x6c,
-	0x60, 0xb7, 0x19, 0x03, 0x02, 0x00, 0x00, 0xff, 0xff, 0xe0, 0x9a, 0xcb, 0x0d, 0xa7, 0x00, 0x00,
-	0x00,
+	0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0xcd, 0xcc, 0xd5, 0xcb, 0x2d, 0x54, 0xea, 0x63, 0xe4, 0xe2,
+	0x29, 0x28, 0x2d, 0xce, 0x70, 0x2f, 0xca, 0x2f, 0x2d, 0xf0, 0x2d, 0x4e, 0x17, 0x92, 0xe0, 0x62,
+	0x4f, 0xce, 0xcf, 0xcd, 0x4d, 0xcc, 0x4b, 0x91, 0x60, 0x54, 0x60, 0xd4, 0x60, 0x0d, 0x82, 0x71,
+	0x41, 0x32, 0xe9, 0x20, 0x55, 0x9e, 0x29, 0x12, 0x4c, 0x0a, 0x8c, 0x1a, 0xcc, 0x41, 0x30, 0x2e,
+	0x44, 0x4f, 0x5e, 0x49, 0x6a, 0x5e, 0x89, 0x04, 0xb3, 0x02, 0xa3, 0x06, 0x4f, 0x10, 0x8c, 0x2b,
+	0x24, 0xc6, 0xc5, 0x56, 0x5a, 0x9c, 0x5a, 0xe4, 0x99, 0x22, 0xc1, 0x02, 0xd6, 0x02, 0xe5, 0x81,
+	0x74, 0xe4, 0x97, 0x64, 0x80, 0x25, 0x58, 0x15, 0x98, 0x41, 0x66, 0x41, 0xb9, 0x49, 0x6c, 0x60,
+	0xe7, 0x19, 0x03, 0x02, 0x00, 0x00, 0xff, 0xff, 0xbc, 0x81, 0x6b, 0xf6, 0xaa, 0x00, 0x00, 0x00,
 }

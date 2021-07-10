@@ -29,7 +29,7 @@ func (w *wsServer) Stop() error {
 type wsServer struct {
 	srv         *gev.Server
 	connManager connectionmanger.ConnectionManager
-	roomManager connectionmanger.RoomConnectionManager
+	roomManager connectionmanger.GroupConnectionManager
 }
 
 type Options struct {
@@ -38,7 +38,7 @@ type Options struct {
 
 	ConnManager connectionmanger.ConnectionManager
 	ImHandler   imHandler.ImHandler
-	RoomManager connectionmanger.RoomConnectionManager
+	RoomManager connectionmanger.GroupConnectionManager
 }
 
 type Option func(*Options)

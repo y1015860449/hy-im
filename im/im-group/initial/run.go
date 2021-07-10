@@ -9,14 +9,14 @@ import (
 	"github.com/y1015860449/go-tools/hy_servicectrl/hy_tracer"
 	"github.com/y1015860449/go-tools/hymongodb"
 	"github.com/y1015860449/go-tools/hyredis"
-	"hy-im/im/im-common/base"
+	"hy-im/im/im-common/imbase"
 	imName "hy-im/im/im-common/name"
 	innerPt "hy-im/im/im-common/proto/inner"
-	"hy-im/im/im-room/conf"
-	"hy-im/im/im-room/dao/cache"
-	"hy-im/im/im-room/dao/message"
-	"hy-im/im/im-room/handler"
-	"hy-im/im/im-room/service"
+	"hy-im/im/im-group/conf"
+	"hy-im/im/im-group/dao/cache"
+	"hy-im/im/im-group/dao/message"
+	"hy-im/im/im-group/handler"
+	"hy-im/im/im-group/service"
 	"os"
 	"os/signal"
 	"syscall"
@@ -80,9 +80,9 @@ func Run(f string) {
 	if err != nil {
 		log.Fatalf("init mongodb err (%v)", err)
 	}
-	msgDao := message.NewRoomMsgOperator(base.MongodbRoom, hyMongo)
+	msgDao := message.NewRoomMsgOperator(imbase.MongodbRoom, hyMongo)
 	cacheDao := cache.NewCacheOperator(hyRedis)
-	roomHandler := handler.Handler{CacheDao: cacheDao, MsgDao: msgDao}
+	roomHandler := handler.Handler{CacheDao: cacheDao, GroupMsgDao: msgDao}
 	if err := innerPt.RegisterImRoomHandler(srv.Server(), &roomHandler); err != nil {
 		log.Fatalf("register login srv handler err (%v)", err)
 	}

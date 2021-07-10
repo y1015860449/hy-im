@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/Allenxuxu/gev v0.2.3
 	github.com/Allenxuxu/ringbuffer v0.0.9
-	github.com/antonfisher/nested-logrus-formatter v1.3.0 // indirect
+	github.com/common v0.0.0-00010101000000-000000000000
 	github.com/gobwas/pool v0.2.0
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2
@@ -19,10 +19,8 @@ require (
 	github.com/micro/go-plugins/wrapper/ratelimiter/ratelimit/v2 v2.9.1
 	github.com/micro/go-plugins/wrapper/trace/opentracing/v2 v2.9.1
 	github.com/opentracing/opentracing-go v1.2.0
-	github.com/prometheus/client_golang v1.11.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
-	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/spaolacci/murmur3 v1.1.0
 	github.com/y1015860449/go-tools v0.0.6
 	go.mongodb.org/mongo-driver v1.5.3

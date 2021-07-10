@@ -6,7 +6,7 @@ import (
 	"github.com/Allenxuxu/gev/connection"
 	"github.com/Allenxuxu/gev/plugins/websocket/ws"
 	log "github.com/sirupsen/logrus"
-	"hy-im/im/im-common/base"
+	"hy-im/im/im-common/imbase"
 	appPt "hy-im/im/im-common/proto/app"
 	innerPt "hy-im/im/im-common/proto/inner"
 	"hy-im/im/im-gateway/clientlink/connectionmanger"
@@ -17,7 +17,7 @@ import (
 type handler struct {
 	connManager connectionmanger.ConnectionManager
 	imHandler   imHandler.ImHandler
-	roomManager connectionmanger.RoomConnectionManager
+	roomManager connectionmanger.GroupConnectionManager
 }
 
 func (h *handler) OnConnect(c *connection.Connection) {
@@ -41,7 +41,7 @@ func (h *handler) OnMessage(c *connection.Connection, msg []byte) (ws.MessageTyp
 		} else {
 			if command == int32(appPt.ImCmd_cmd_login_ack) && svcCode == int32(innerPt.SrvErr_srv_err_success) {
 				c.SetContext(loginIfo)
-				h.connManager.AddConnection(fmt.Sprintf("%d:%d", loginIfo.UserId, loginIfo.LoginType), NewWSConnection(c, base.WsConnection, loginIfo))
+				h.connManager.AddConnection(fmt.Sprintf("%d:%d", loginIfo.UserId, loginIfo.LoginType), NewWSConnection(c, imbase.WsConnection, loginIfo))
 				sendMessage(c, uint16(command), content, ws.MessageBinary)
 			} else {
 				sendMessage(c, uint16(command), content, ws.MessageBinary)
@@ -61,8 +61,8 @@ func (h *handler) OnMessage(c *connection.Connection, msg []byte) (ws.MessageTyp
 	switch {
 	case cmd == uint16(appPt.ImCmd_cmd_heartbeat):
 		sendMessage(c, uint16(appPt.ImCmd_cmd_heartbeat_ack), nil, ws.MessageBinary)
-	case cmd >= uint16(appPt.ImCmd_cmd_room_msg) && cmd <= 0x2000:
-		if command, content, svcCode, err := h.imHandler.HandlerRoom(context.Background(), int32(rcvMsg.Command), int32(rcvMsg.Retry), rcvMsg.Content, loginInfo); err != nil {
+	case cmd >= uint16(appPt.ImCmd_cmd_group_msg) && cmd <= 0x2000:
+		if command, content, svcCode, err := h.imHandler.HandlerGroup(context.Background(), int32(rcvMsg.Command), int32(rcvMsg.Retry), rcvMsg.Content, loginInfo); err != nil {
 			log.Errorf("handler chat err(%v)", err)
 		} else {
 			if svcCode != int32(innerPt.SrvErr_srv_err_success) {

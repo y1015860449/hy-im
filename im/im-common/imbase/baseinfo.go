@@ -1,4 +1,4 @@
-package base
+package imbase
 
 const (
 	LoginApp = 0
@@ -12,9 +12,8 @@ const (
 
 	SessionTypeChat = 0
 	SessionTypeGroup = 1
-	SessionTypeSignal = 2
-	SessionTypeRoom = 3
-	SessionTypeCustomer = 4
+	SessionTypeCustomer = 2
 
 	MongodbRoom = "roomSrv"
+	MongodbGroup = "groupSrv"
 )

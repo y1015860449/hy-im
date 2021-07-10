@@ -12,7 +12,7 @@ import (
 type tcpServer struct {
 	srv         *gev.Server
 	connManager connectionmanger.ConnectionManager
-	roomManager connectionmanger.RoomConnectionManager
+	roomManager connectionmanger.GroupConnectionManager
 }
 
 func (t *tcpServer) Start() error {
@@ -35,7 +35,7 @@ type Options struct {
 
 	ConnManager connectionmanger.ConnectionManager
 	ImHandler   imHandler.ImHandler
-	RoomManager connectionmanger.RoomConnectionManager
+	RoomManager connectionmanger.GroupConnectionManager
 }
 
 type Option func(*Options)

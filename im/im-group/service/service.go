@@ -12,7 +12,7 @@ import (
 	goTracing "github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
 	imName "hy-im/im/im-common/name"
-	"hy-im/im/im-room/conf"
+	"hy-im/im/im-group/conf"
 	"time"
 )
 

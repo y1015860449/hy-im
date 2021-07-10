@@ -13,36 +13,36 @@ enum ImCmd {
     cmd_logout_ack = 0x0804;
     cmd_kick_out = 0x0806;
 
-    cmd_room_msg = 0x1001;
-    cmd_room_msg_ack = 0x1002;
-    cmd_room_msg_deliver = 0x1004;
-    cmd_room_msg_deliver_ack = 0x1003;
+    cmd_group_msg = 0x1001;
+    cmd_group_msg_ack = 0x1002;
+    cmd_group_msg_deliver = 0x1004;
+    cmd_group_msg_deliver_ack = 0x1003;
 
     // 打开
-    cmd_room_open = 0x1005;
-    cmd_room_open_ack = 0x1006;
-    cmd_room_open_deliver = 0x1008;
-    cmd_room_open_deliver_ack = 0x1007;
+    cmd_group_open = 0x1005;
+    cmd_group_open_ack = 0x1006;
+    cmd_group_open_deliver = 0x1008;
+    cmd_group_open_deliver_ack = 0x1007;
     // 加入
-    cmd_room_join = 0x1009;
-    cmd_room_join_ack = 0x100a;
-    cmd_room_join_deliver = 0x100c;
-    cmd_room_join_deliver_ack = 0x100b;
+    cmd_group_join = 0x1009;
+    cmd_group_join_ack = 0x100a;
+    cmd_group_join_deliver = 0x100c;
+    cmd_group_join_deliver_ack = 0x100b;
     // 移除
-    cmd_room_remove = 0x100d;
-    cmd_room_remove_ack = 0x100e;
-    cmd_room_remove_deliver = 0x1010;
-    cmd_room_remove_deliver_ack = 0x100f;
+    cmd_group_remove = 0x100d;
+    cmd_group_remove_ack = 0x100e;
+    cmd_group_remove_deliver = 0x1010;
+    cmd_group_remove_deliver_ack = 0x100f;
     // 退出
-    cmd_room_quit = 0x1011;
-    cmd_room_quit_ack = 0x1012;
-    cmd_room_quit_deliver = 0x1014;
-    cmd_room_quit_deliver_ack = 0x1013;
+    cmd_group_quit = 0x1011;
+    cmd_group_quit_ack = 0x1012;
+    cmd_group_quit_deliver = 0x1014;
+    cmd_group_quit_deliver_ack = 0x1013;
     // 关闭
-    cmd_room_close = 0x1015;
-    cmd_room_close_ack = 0x1016;
-    cmd_room_close_deliver = 0x1018;
-    cmd_room_close_deliver_ack = 0x1017;
+    cmd_group_close = 0x1015;
+    cmd_group_close_ack = 0x1016;
+    cmd_group_close_deliver = 0x1018;
+    cmd_group_close_deliver_ack = 0x1017;
 }
 
 enum ImErrCode {

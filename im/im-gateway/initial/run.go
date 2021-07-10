@@ -70,10 +70,10 @@ func Run(f string) {
 	loginRpc := inner.NewImLoginService(imName.RpcImLogin, cl)
 	roomRpc := inner.NewImRoomService(imName.RpcImRoom, cl)
 	opts := &imhandler.Options{
-		LoginCli:    loginRpc,
-		RoomCli:     roomRpc,
-		ConnManager: connManger,
-		RoomManager: roomManager,
+		LoginCli:     loginRpc,
+		GroupCli:     roomRpc,
+		ConnManager:  connManger,
+		GroupManager: roomManager,
 	}
 	handler := imhandler.NewImHandler(func(options *imhandler.Options) {
 		options = opts

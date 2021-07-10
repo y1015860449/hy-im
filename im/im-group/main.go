@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"hy-im/im/im-room/initial"
+	"hy-im/im/im-group/initial"
 	"os"
 )
 

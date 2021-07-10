@@ -4,26 +4,26 @@ syntax = "proto3";
 
 package inner;
 
-message roomReq {
+message groupReq {
   int64 userId = 1;
   int32 loginType = 2;
   int32 roleType = 3;
-  int64 roomId = 4;
+  int64 groupId = 4;
   int32 command = 5;
   bytes content = 6;
   int32 retry = 7;
 }
 
-message roomRsp {
+message groupRsp {
   int64 userId = 1;
   int32 loginType = 2;
   int32 roleType = 3;
-  int64 roomId = 4;
+  int64 groupId = 4;
   int32 command = 5;
   bytes content = 6;
   int32 svcErr = 7;
 }
 
-service ImRoom{
-  rpc Room(roomReq) returns (roomRsp);
+service ImGroup{
+  rpc Group(groupReq) returns (groupRsp);
 }

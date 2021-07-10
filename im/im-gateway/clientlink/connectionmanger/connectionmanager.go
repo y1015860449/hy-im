@@ -47,66 +47,66 @@ func NewConnManager() ConnectionManager {
 	}
 }
 
-type RoomConnectionManager interface {
+type GroupConnectionManager interface {
 	AddConnection(roomId int64, key string, sender _interface.Connection)
 	GetConnections(roomId int64) *sync.Map
 	DelConnection(roomId int64, key string)
-	DelRoom(roomId int64)
+	DelGroup(roomId int64)
 }
 
-type roomManager struct {
-	roomMembers map[int64]*sync.Map
-	mtx         sync.RWMutex
+type groupManager struct {
+	groupMembers map[int64]*sync.Map
+	mtx          sync.RWMutex
 }
 
-func (r *roomManager) AddConnection(roomId int64, key string, sender _interface.Connection) {
+func (r *groupManager) AddConnection(roomId int64, key string, sender _interface.Connection) {
 	r.mtx.Lock()
 	defer r.mtx.Unlock()
-	if value, ok := r.roomMembers[roomId]; ok {
+	if value, ok := r.groupMembers[roomId]; ok {
 		value.Store(key, sender)
 	} else {
 		var members sync.Map
 		members.Store(key, sender)
-		r.roomMembers[roomId] = &members
+		r.groupMembers[roomId] = &members
 	}
 }
 
-func (r *roomManager) GetConnections(roomId int64) *sync.Map {
+func (r *groupManager) GetConnections(roomId int64) *sync.Map {
 	r.mtx.RLock()
 	defer r.mtx.RUnlock()
-	if value, ok := r.roomMembers[roomId]; ok {
+	if value, ok := r.groupMembers[roomId]; ok {
 		return value
 	}
 	return nil
 }
 
-func (r *roomManager) DelConnection(roomId int64, key string) {
+func (r *groupManager) DelConnection(roomId int64, key string) {
 	r.mtx.RLock()
 	defer r.mtx.RUnlock()
-	if value, ok := r.roomMembers[roomId]; ok {
+	if value, ok := r.groupMembers[roomId]; ok {
 		value.Delete(key)
 	}
 }
 
-func (r *roomManager) DelRoom(roomId int64) {
+func (r *groupManager) DelGroup(roomId int64) {
 	r.mtx.Lock()
 	defer r.mtx.Unlock()
-	if roomNumbers, ok := r.roomMembers[roomId]; ok {
+	if roomNumbers, ok := r.groupMembers[roomId]; ok {
 		roomNumbers.Range(func(key, value interface{}) bool {
 			conn := value.(_interface.Connection)
 			connCtx := conn.GetContext().(common.ConnectionCtx)
-			connCtx.RoomId = 0
+			connCtx.GroupId = 0
 			conn.SetContext(connCtx)
 
 			return true
 		})
-		delete(r.roomMembers, roomId)
+		delete(r.groupMembers, roomId)
 	}
 }
 
-func NewRoomConnectionManager() RoomConnectionManager {
-	return &roomManager{
-		roomMembers: make(map[int64]*sync.Map),
-		mtx:         sync.RWMutex{},
+func NewRoomConnectionManager() GroupConnectionManager {
+	return &groupManager{
+		groupMembers: make(map[int64]*sync.Map),
+		mtx:          sync.RWMutex{},
 	}
 }

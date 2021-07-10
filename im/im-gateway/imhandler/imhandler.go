@@ -13,23 +13,23 @@ import (
 type ImHandler interface {
 	HandlerLogin(ctx context.Context, command int32, content []byte) (int32, []byte, common.LoginInfo, int32, error)
 	HandlerLogout(ctx context.Context, loginInfo common.LoginInfo, linkToken string) error
-	HandlerRoom(ctx context.Context, command, retry int32, content []byte, loginInfo common.LoginInfo) (int32, []byte, int32, error)
+	HandlerGroup(ctx context.Context, command, retry int32, content []byte, loginInfo common.LoginInfo) (int32, []byte, int32, error)
 }
 
 type imHandler struct {
 	loginCli innerPt.ImLoginService
-	roomCli  innerPt.ImRoomService
+	groupCli innerPt.ImGroupService
 
-	connManager connectionmanger.ConnectionManager
-	roomManager connectionmanger.RoomConnectionManager
+	connManager  connectionmanger.ConnectionManager
+	groupManager connectionmanger.GroupConnectionManager
 }
 
 type Options struct {
 	LoginCli innerPt.ImLoginService
-	RoomCli  innerPt.ImRoomService
+	GroupCli innerPt.ImGroupService
 
-	ConnManager connectionmanger.ConnectionManager
-	RoomManager connectionmanger.RoomConnectionManager
+	ConnManager  connectionmanger.ConnectionManager
+	GroupManager connectionmanger.GroupConnectionManager
 }
 
 type Option func(*Options)
@@ -61,28 +61,28 @@ func (i *imHandler) HandlerLogout(ctx context.Context, loginInfo common.LoginInf
 	return nil
 }
 
-func (i *imHandler) HandlerRoom(ctx context.Context, command, retry int32, content []byte, loginInfo common.LoginInfo) (int32, []byte, int32, error) {
+func (i *imHandler) HandlerGroup(ctx context.Context, command, retry int32, content []byte, loginInfo common.LoginInfo) (int32, []byte, int32, error) {
 	conn := i.connManager.GetConnection(fmt.Sprintf("%d:%d", loginInfo.UserId, loginInfo.LoginType))
 	connCtx := conn.GetContext().(*common.ConnectionCtx)
-	roomReq := &innerPt.RoomReq{
+	groupReq := &innerPt.GroupReq{
 		UserId:    loginInfo.UserId,
 		LoginType: loginInfo.LoginType,
 		RoleType:  connCtx.RoleType,
-		RoomId:    connCtx.RoomId,
+		GroupId:    connCtx.GroupId,
 		Command:   command,
 		Retry:     retry,
 		Content:   content,
 	}
-	roomRsp, err := i.roomCli.Room(ctx, roomReq)
+	groupRsp, err := i.groupCli.Group(ctx, groupReq)
 	if err != nil {
-		log.Errorf("rpc login err(%+v) rsp(%+x)", err, roomRsp)
-		if roomRsp == nil {
+		log.Errorf("rpc login err(%+v) rsp(%+x)", err, groupRsp)
+		if groupRsp == nil {
 			return 0, nil, 0, err
 		}
 	}
-	i.roomManagerHandler(roomRsp)
+	i.groupManagerHandler(groupRsp)
 
-	return roomRsp.Command, roomRsp.Content, roomRsp.SvcErr, nil
+	return groupRsp.Command, groupRsp.Content, groupRsp.SvcErr, nil
 }
 
 func NewImHandler(opt ...Option) ImHandler {
@@ -91,14 +91,14 @@ func NewImHandler(opt ...Option) ImHandler {
 		value(&opts)
 	}
 	return &imHandler{
-		loginCli:    opts.LoginCli,
-		roomCli:     opts.RoomCli,
-		connManager: opts.ConnManager,
-		roomManager: opts.RoomManager,
+		loginCli:     opts.LoginCli,
+		groupCli:     opts.GroupCli,
+		connManager:  opts.ConnManager,
+		groupManager: opts.GroupManager,
 	}
 }
 
-func (i *imHandler) roomManagerHandler(rsp *innerPt.RoomRsp) {
+func (i *imHandler) groupManagerHandler(rsp *innerPt.GroupRsp) {
 	if rsp.SvcErr != int32(innerPt.SrvErr_srv_err_success) {
 		return
 	}
@@ -106,19 +106,19 @@ func (i *imHandler) roomManagerHandler(rsp *innerPt.RoomRsp) {
 	conn := i.connManager.GetConnection(key)
 	connCtx := conn.GetContext().(common.ConnectionCtx)
 	switch rsp.Command {
-	case int32(appPt.ImCmd_cmd_room_open_ack),
-		int32(appPt.ImCmd_cmd_room_join_ack):
-		connCtx.RoomId = rsp.RoomId
+	case int32(appPt.ImCmd_cmd_group_open_ack),
+		int32(appPt.ImCmd_cmd_group_join_ack):
+		connCtx.GroupId = rsp.GroupId
 		conn.SetContext(connCtx)
-		i.roomManager.AddConnection(rsp.RoomId, key, conn)
-	case int32(appPt.ImCmd_cmd_room_quit_ack):
-		connCtx.RoomId = 0
+		i.groupManager.AddConnection(rsp.GroupId, key, conn)
+	case int32(appPt.ImCmd_cmd_group_quit_ack):
+		connCtx.GroupId = 0
 		conn.SetContext(connCtx)
-		i.roomManager.DelConnection(rsp.RoomId, key)
-	case int32(appPt.ImCmd_cmd_room_close_ack):
-		i.roomManager.DelRoom(rsp.RoomId)
-	case int32(appPt.ImCmd_cmd_room_remove_ack):
-		log.Infof("remove room %d", rsp.Command)
+		i.groupManager.DelConnection(rsp.GroupId, key)
+	case int32(appPt.ImCmd_cmd_group_close_ack):
+		i.groupManager.DelGroup(rsp.GroupId)
+	case int32(appPt.ImCmd_cmd_group_remove_ack):
+		log.Infof("remove group %d", rsp.Command)
 	default:
 		log.Warnf("unknown command %d", rsp.Command)
 	}

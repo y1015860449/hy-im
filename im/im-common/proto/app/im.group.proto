@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package im.app;
+
+
+/////////////////////////////////////
+// cmd_group_msg = 0x1001;
+/////////////////////////////////////
+message groupMsg {
+  int64 groupId = 1;    // 群组Id
+  int32 groupType = 2; // 群组类型
+  int64 fromId = 3;     // 发送者
+  int32 priority = 4;   // 优先级
+  string clientMsgId = 5;     // 消息ID-客户端唯一
+  string msgId = 6;  // 服务端生成的消息ID-顺序递增且全局唯一
+  int32 encrypt = 7;    // 加密类型 0 不加密 1 base64 2 AES  3 RSA
+  bytes content = 8;    // 消息内容
+  int64 msgTime = 9;  // 发送时间
+  int32 atCount = 10;    // -1:表示@all
+  repeated int64 atUsers = 11;  // @的成员
+  bytes extend = 12;     // 扩展字段
+}
+
+message groupAck {
+  int64 groupId = 1;
+  int64 userId = 2;
+  string clientMsgId = 3;
+  string msgId = 4;
+  int64 msgTime = 5;
+  int32 errCode = 6;
+}
+
+message groupDeliverAck {
+  int64 groupId = 1;
+  int64 userId = 2;
+  repeated string msgId = 3;
+}
+
+
+/////////////////////////////////////////////
+// cmd_group_open = 0x1005;
+// cmd_group_join = 0x1009;
+// cmd_group_remove = 0x100d;
+// cmd_group_quit = 0x10
+// cmd_group_close = 0x1015;
+////////////////////////////////////////////
+message groupOperator {
+    int64 groupId = 1;
+    int32 groupType = 2; // 群组类型
+    int64 userId = 3;
+    string clientMsgId = 4;
+    string msgId = 5;  // 服务端生成的消息ID-顺序递增且全局唯一
+    int64 msgTime = 6;
+    string extend = 7;
+    repeated int64 otherId = 8;
+}
+

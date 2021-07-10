@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/Allenxuxu/gev/connection"
 	log "github.com/sirupsen/logrus"
-	"hy-im/im/im-common/base"
+	"hy-im/im/im-common/imbase"
 	appPt "hy-im/im/im-common/proto/app"
 	innerPt "hy-im/im/im-common/proto/inner"
 	"hy-im/im/im-gateway/clientlink/connectionmanger"
@@ -16,7 +16,7 @@ import (
 type handler struct {
 	connManager connectionmanger.ConnectionManager
 	imHandler   imHandler.ImHandler
-	roomManager connectionmanger.RoomConnectionManager
+	roomManager connectionmanger.GroupConnectionManager
 }
 
 func (h *handler) OnMessage(c *connection.Connection, ctx interface{}, data []byte) []byte {
@@ -38,7 +38,7 @@ func (h *handler) OnMessage(c *connection.Connection, ctx interface{}, data []by
 		} else {
 			if command == int32(appPt.ImCmd_cmd_login_ack) && svcCode == int32(innerPt.SrvErr_srv_err_success) {
 				c.SetContext(loginIfo)
-				h.connManager.AddConnection(fmt.Sprintf("%d:%d", loginIfo.UserId, loginIfo.LoginType), NewTcpConnection(c, base.TcpConnection, loginIfo))
+				h.connManager.AddConnection(fmt.Sprintf("%d:%d", loginIfo.UserId, loginIfo.LoginType), NewTcpConnection(c, imbase.TcpConnection, loginIfo))
 				sendMessage(c, &rcvMsg.Header, uint16(command), content)
 			} else {
 				sendMessage(c, &rcvMsg.Header, uint16(command), content)
@@ -57,8 +57,8 @@ func (h *handler) OnMessage(c *connection.Connection, ctx interface{}, data []by
 	switch {
 	case cmd == uint16(appPt.ImCmd_cmd_heartbeat):
 		sendMessage(c, &rcvMsg.Header, uint16(appPt.ImCmd_cmd_heartbeat_ack), nil)
-	case cmd >= uint16(appPt.ImCmd_cmd_room_msg) && cmd <= 0x2000:
-		if command, content, svcCode, err := h.imHandler.HandlerRoom(context.Background(), int32(rcvMsg.Header.Command), int32(rcvMsg.Header.Retry), rcvMsg.Content, loginInfo); err != nil {
+	case cmd >= uint16(appPt.ImCmd_cmd_group_msg) && cmd <= 0x2000:
+		if command, content, svcCode, err := h.imHandler.HandlerGroup(context.Background(), int32(rcvMsg.Header.Command), int32(rcvMsg.Header.Retry), rcvMsg.Content, loginInfo); err != nil {
 			log.Errorf("handler chat err(%v)", err)
 		} else {
 			if svcCode != int32(innerPt.SrvErr_srv_err_success) {
