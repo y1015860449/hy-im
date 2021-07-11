@@ -33,35 +33,35 @@ var _ context.Context
 var _ client.Option
 var _ server.Option
 
-// Api Endpoints for ApiUser service
+// Api Endpoints for ApiGroup service
 
-func NewApiUserEndpoints() []*api.Endpoint {
+func NewApiGroupEndpoints() []*api.Endpoint {
 	return []*api.Endpoint{}
 }
 
-// Client API for ApiUser service
+// Client API for ApiGroup service
 
-type ApiUserService interface {
+type ApiGroupService interface {
 	Register(ctx context.Context, in *RegisterReq, opts ...client.CallOption) (*RegisterRsp, error)
 	Login(ctx context.Context, in *LoginReq, opts ...client.CallOption) (*LoginRsp, error)
 	Logout(ctx context.Context, in *LogoutReq, opts ...client.CallOption) (*LogoutRsp, error)
 	CheckToken(ctx context.Context, in *CheckTokenReq, opts ...client.CallOption) (*CheckTokenRsp, error)
 }
 
-type apiUserService struct {
+type apiGroupService struct {
 	c    client.Client
 	name string
 }
 
-func NewApiUserService(name string, c client.Client) ApiUserService {
-	return &apiUserService{
+func NewApiGroupService(name string, c client.Client) ApiGroupService {
+	return &apiGroupService{
 		c:    c,
 		name: name,
 	}
 }
 
-func (c *apiUserService) Register(ctx context.Context, in *RegisterReq, opts ...client.CallOption) (*RegisterRsp, error) {
-	req := c.c.NewRequest(c.name, "ApiUser.Register", in)
+func (c *apiGroupService) Register(ctx context.Context, in *RegisterReq, opts ...client.CallOption) (*RegisterRsp, error) {
+	req := c.c.NewRequest(c.name, "ApiGroup.Register", in)
 	out := new(RegisterRsp)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -70,8 +70,8 @@ func (c *apiUserService) Register(ctx context.Context, in *RegisterReq, opts ...
 	return out, nil
 }
 
-func (c *apiUserService) Login(ctx context.Context, in *LoginReq, opts ...client.CallOption) (*LoginRsp, error) {
-	req := c.c.NewRequest(c.name, "ApiUser.Login", in)
+func (c *apiGroupService) Login(ctx context.Context, in *LoginReq, opts ...client.CallOption) (*LoginRsp, error) {
+	req := c.c.NewRequest(c.name, "ApiGroup.Login", in)
 	out := new(LoginRsp)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -80,8 +80,8 @@ func (c *apiUserService) Login(ctx context.Context, in *LoginReq, opts ...client
 	return out, nil
 }
 
-func (c *apiUserService) Logout(ctx context.Context, in *LogoutReq, opts ...client.CallOption) (*LogoutRsp, error) {
-	req := c.c.NewRequest(c.name, "ApiUser.Logout", in)
+func (c *apiGroupService) Logout(ctx context.Context, in *LogoutReq, opts ...client.CallOption) (*LogoutRsp, error) {
+	req := c.c.NewRequest(c.name, "ApiGroup.Logout", in)
 	out := new(LogoutRsp)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -90,8 +90,8 @@ func (c *apiUserService) Logout(ctx context.Context, in *LogoutReq, opts ...clie
 	return out, nil
 }
 
-func (c *apiUserService) CheckToken(ctx context.Context, in *CheckTokenReq, opts ...client.CallOption) (*CheckTokenRsp, error) {
-	req := c.c.NewRequest(c.name, "ApiUser.CheckToken", in)
+func (c *apiGroupService) CheckToken(ctx context.Context, in *CheckTokenReq, opts ...client.CallOption) (*CheckTokenRsp, error) {
+	req := c.c.NewRequest(c.name, "ApiGroup.CheckToken", in)
 	out := new(CheckTokenRsp)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -100,45 +100,45 @@ func (c *apiUserService) CheckToken(ctx context.Context, in *CheckTokenReq, opts
 	return out, nil
 }
 
-// Server API for ApiUser service
+// Server API for ApiGroup service
 
-type ApiUserHandler interface {
+type ApiGroupHandler interface {
 	Register(context.Context, *RegisterReq, *RegisterRsp) error
 	Login(context.Context, *LoginReq, *LoginRsp) error
 	Logout(context.Context, *LogoutReq, *LogoutRsp) error
 	CheckToken(context.Context, *CheckTokenReq, *CheckTokenRsp) error
 }
 
-func RegisterApiUserHandler(s server.Server, hdlr ApiUserHandler, opts ...server.HandlerOption) error {
-	type apiUser interface {
+func RegisterApiGroupHandler(s server.Server, hdlr ApiGroupHandler, opts ...server.HandlerOption) error {
+	type apiGroup interface {
 		Register(ctx context.Context, in *RegisterReq, out *RegisterRsp) error
 		Login(ctx context.Context, in *LoginReq, out *LoginRsp) error
 		Logout(ctx context.Context, in *LogoutReq, out *LogoutRsp) error
 		CheckToken(ctx context.Context, in *CheckTokenReq, out *CheckTokenRsp) error
 	}
-	type ApiUser struct {
-		apiUser
+	type ApiGroup struct {
+		apiGroup
 	}
-	h := &apiUserHandler{hdlr}
-	return s.Handle(s.NewHandler(&ApiUser{h}, opts...))
+	h := &apiGroupHandler{hdlr}
+	return s.Handle(s.NewHandler(&ApiGroup{h}, opts...))
 }
 
-type apiUserHandler struct {
-	ApiUserHandler
+type apiGroupHandler struct {
+	ApiGroupHandler
 }
 
-func (h *apiUserHandler) Register(ctx context.Context, in *RegisterReq, out *RegisterRsp) error {
-	return h.ApiUserHandler.Register(ctx, in, out)
+func (h *apiGroupHandler) Register(ctx context.Context, in *RegisterReq, out *RegisterRsp) error {
+	return h.ApiGroupHandler.Register(ctx, in, out)
 }
 
-func (h *apiUserHandler) Login(ctx context.Context, in *LoginReq, out *LoginRsp) error {
-	return h.ApiUserHandler.Login(ctx, in, out)
+func (h *apiGroupHandler) Login(ctx context.Context, in *LoginReq, out *LoginRsp) error {
+	return h.ApiGroupHandler.Login(ctx, in, out)
 }
 
-func (h *apiUserHandler) Logout(ctx context.Context, in *LogoutReq, out *LogoutRsp) error {
-	return h.ApiUserHandler.Logout(ctx, in, out)
+func (h *apiGroupHandler) Logout(ctx context.Context, in *LogoutReq, out *LogoutRsp) error {
+	return h.ApiGroupHandler.Logout(ctx, in, out)
 }
 
-func (h *apiUserHandler) CheckToken(ctx context.Context, in *CheckTokenReq, out *CheckTokenRsp) error {
-	return h.ApiUserHandler.CheckToken(ctx, in, out)
+func (h *apiGroupHandler) CheckToken(ctx context.Context, in *CheckTokenReq, out *CheckTokenRsp) error {
+	return h.ApiGroupHandler.CheckToken(ctx, in, out)
 }

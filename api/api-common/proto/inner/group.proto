@@ -1,0 +1,128 @@
+// protoc --proto_path=. --micro_out=. --go_out=. *.proto
+
+syntax = "proto3";
+
+package inner;
+
+message CreateGroupReq {
+    int64 userId = 1;
+    int32 groupType = 2;
+    int32 mute  = 3;
+}
+
+message CreateGroupRsp {
+    int64 userId = 1;
+    int64 groupId = 2;
+    int32 status = 3;
+    int32 groupType = 4;
+    int32 mute  = 5;
+    int64 master = 6;
+    string secretKey = 7;
+    int32 svcErr = 8;
+}
+
+message DismissGroupReq {
+    int64 userId = 1;
+    int64 groupId = 2;
+}
+
+message DismissGroupRsp {
+    int64 userId = 1;
+    int64 groupId = 2;
+    int32 svcErr = 3;
+}
+
+message ChangeGroupMasterReq {
+    int64 userId = 1;
+    int64 groupId = 2;
+    int64 newMaster = 3;
+}
+
+message ChangeGroupMasterRsp {
+    int64 userId = 1;
+    int64 groupId = 2;
+    int32 svcErr = 3;
+}
+
+message AddGroupMemberReq {
+    int64 userId = 1;
+    int64 groupId = 2;
+    repeated int64 members = 3;
+}
+
+message AddGroupMemberRsp {
+    int64 userId = 1;
+    int64 groupId = 2;
+    int32 svcErr = 3;
+}
+
+message RemoveGroupMemberReq {
+    int64 userId = 1;
+    int64 groupId = 2;
+    repeated int64 members = 3;
+}
+
+message RemoveGroupMemberRsp {
+    int64 userId = 1;
+    int64 groupId = 2;
+    int32 svcErr = 3;
+}
+
+
+message QuitGroupMemberReq {
+    int64 userId = 1;
+    int64 groupId = 2;
+}
+
+message QuitGroupMemberRsp {
+    int64 userId = 1;
+    int64 groupId = 2;
+    int32 svcErr = 3;
+}
+
+message GetGroupInfoReq {
+    int64 userId = 1;
+    int32 groupType = 2;
+    int32 mute  = 3;
+}
+
+message GetGroupInfoRsp {
+    int64 userId = 1;
+    int64 groupId = 2;
+    int32 status = 3;
+    int32 groupType = 4;
+    int32 mute  = 5;
+    int64 master = 6;
+    string secretKey = 7;
+    int32 svcErr = 8;
+}
+
+message GetGroupListReq {
+    int64 userId = 1;
+    int64 groupId = 2;
+}
+
+message groupMemberInfo {
+    int64 userId = 1;
+    int32 role = 2;
+    int32 mute = 3;
+}
+
+message GetGroupListRsp {
+    int64 userId = 1;
+    int64 groupId = 2;
+    repeated groupMemberInfo list = 3;
+    int32 svcErr = 4;
+}
+
+service ApiUser{
+  rpc CreateGroup(CreateGroupReq) returns (CreateGroupRsp);  // 創建群
+  rpc DismissGroup(DismissGroupReq) returns (DismissGroupRsp);   // 解散群
+  rpc ChangeGroupMaster(ChangeGroupMasterReq) returns (ChangeGroupMasterRsp);    // 轉讓群組
+  rpc AddGroupMember(AddGroupMemberReq) returns (AddGroupMemberRsp);    // 添加群成員
+  rpc RemoveGroupMember(RemoveGroupMemberReq) returns (RemoveGroupMemberRsp);    // 移除群成員
+  rpc QuitGroupMember(QuitGroupMemberReq) returns (QuitGroupMemberRsp);    // 退出群成員
+
+  rpc GetGroupInfo(GetGroupInfoReq) returns (GetGroupInfoRsp);    // 獲取群組信息
+  rpc GetGroupList(GetGroupListReq) returns (GetGroupListRsp);    // 獲取群組成員
+}

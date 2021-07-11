@@ -47,7 +47,7 @@ message CheckTokenRsp {
   int32 svcErr = 3;
 }
 
-service ApiUser{
+service ApiGroup {
   rpc Register(RegisterReq) returns (RegisterRsp);  // 注册
   rpc Login(LoginReq) returns (LoginRsp);   // 登录
   rpc Logout(LogoutReq) returns (LogoutRsp);    // 登出

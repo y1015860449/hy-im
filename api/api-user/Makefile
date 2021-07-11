@@ -4,7 +4,7 @@ GOPATH:=$(shell go env GOPATH)
 
 .PHONY: build
 build:
-	GO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o  im-login *.go
+	GO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o  api-user *.go
 
 .PHONY: test
 test:

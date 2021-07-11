@@ -3,16 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"hy-im/api/api-gateway/initial"
-	"math/rand"
+	"hy-im/api/api-group/initial"
 	"os"
-	"time"
 )
 
 func main() {
-
-	rand.Seed(time.Now().UTC().UnixNano())
-
 	defaultConfig := "./config.yaml"
 	dmEnv := os.Getenv("DM_MODE")
 	if dmEnv != "" {
