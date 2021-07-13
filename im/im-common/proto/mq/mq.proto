@@ -12,3 +12,10 @@ message pushGroupMsg {
     int64 userId = 4;       // 消息的发送者id
     repeated int64 otherId = 5;     // 被移除的用户Id
 }
+
+message pushP2pMsg {
+    int32 command = 1;
+    int64 userId = 2;       // 消息的发送者id
+    int64 toId = 3;
+    bytes content = 4;
+}

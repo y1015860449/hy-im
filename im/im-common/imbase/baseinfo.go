@@ -10,8 +10,8 @@ const (
 	TcpConnection = 0
 	WsConnection = 1
 
-	SessionTypeChat = 0
-	SessionTypeGroup = 1
+	SessionTypeP2p      = 0
+	SessionTypeGroup    = 1
 	SessionTypeCustomer = 2
 
 	MongodbRoom = "roomSrv"

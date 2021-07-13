@@ -113,13 +113,13 @@ func (h *Handler) GroupMsgHandler(req *innerPt.GroupReq, rsp *innerPt.GroupRsp) 
 			}
 			if err := h.GroupMsgDao.InsertDiffusesGroupMsg(msg.FromId, req.LoginType, members, dMsg, gMsg); err != nil {
 				log.Errorf("insert group msg err(%+v)", err)
-				packageGroupResponse(req, rsp, msg.ClientMsgId, serverId, int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_server_except), int32(appPt.ImCmd_cmd_room_msg_ack))
+				packageGroupResponse(req, rsp, msg.ClientMsgId, serverId, int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_server_except), int32(appPt.ImCmd_cmd_group_msg_ack))
 				return err
 			}
 		} else {		// 聊天室、直播
 			if err := h.GroupMsgDao.InsertGroupMsg(msg.GroupId, gMsg); err != nil {
 				log.Errorf("insert group msg err(%+v)", err)
-				packageGroupResponse(req, rsp, msg.ClientMsgId, serverId, int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_server_except), int32(appPt.ImCmd_cmd_room_msg_ack))
+				packageGroupResponse(req, rsp, msg.ClientMsgId, serverId, int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_server_except), int32(appPt.ImCmd_cmd_group_msg_ack))
 				return err
 			}
 		}
@@ -133,7 +133,7 @@ func (h *Handler) GroupMsgHandler(req *innerPt.GroupReq, rsp *innerPt.GroupRsp) 
 	}
 	_ = pushMsg
 
-	packageGroupResponse(req, rsp, msg.ClientMsgId, serverId, int32(innerPt.SrvErr_srv_err_success), int32(appPt.ImErrCode_err_success), int32(appPt.ImCmd_cmd_room_msg_ack))
+	packageGroupResponse(req, rsp, msg.ClientMsgId, serverId, int32(innerPt.SrvErr_srv_err_success), int32(appPt.ImErrCode_err_success), int32(appPt.ImCmd_cmd_group_msg_ack))
 	return nil
 }
 
@@ -159,11 +159,11 @@ func (h *Handler) GroupOperatorHandler(req *innerPt.GroupReq, rsp *innerPt.Group
 		packageGroupResponse(req, rsp, "", "", int32(innerPt.SrvErr_srv_err_param), int32(appPt.ImErrCode_err_param_except), cmdAck)
 		return err
 	}
-	if req.Command == int32(appPt.ImCmd_cmd_group_open) || req.Command == int32(appPt.ImCmd_cmd_room_join) {
+	if req.Command == int32(appPt.ImCmd_cmd_group_open) || req.Command == int32(appPt.ImCmd_cmd_group_join) {
 		// todo 判断房间是否合法
 
 	}
-	serverId := objid.GetObjectId(imbase.SessionTypeRoom, req.GroupId)
+	serverId := objid.GetObjectId(imbase.SessionTypeGroup, req.GroupId)
 	oid, _ := primitive.ObjectIDFromHex(serverId)
 	msg.MsgId = serverId
 	msg.MsgTime = hy_utils.GetMillisecond()

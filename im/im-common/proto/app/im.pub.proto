@@ -43,6 +43,17 @@ enum ImCmd {
     cmd_group_close_ack = 0x1016;
     cmd_group_close_deliver = 0x1018;
     cmd_group_close_deliver_ack = 0x1017;
+
+    cmd_p2p_msg = 0x2001;    // 发送消息
+    cmd_p2p_msg_ack = 0x2002;
+    cmd_p2p_msg_deliver = 0x2004;
+    cmd_p2p_msg_deliver_ack = 0x2003;
+    cmd_p2p_msg_notify = 0x2006;     // 消息已接受通知（服务器发送）
+    cmd_p2p_msg_notify_ack = 0x2005;
+    cmd_p2p_msg_read = 0x2007;   // 消息已读
+    cmd_p2p_msg_read_ack = 0x2008;
+    cmd_p2p_msg_read_deliver = 0x200a;
+    cmd_p2p_msg_read_deliver_ack = 0x2009;
 }
 
 enum ImErrCode {

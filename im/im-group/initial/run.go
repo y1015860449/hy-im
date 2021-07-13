@@ -55,7 +55,7 @@ func Run(f string) {
 	}
 
 	// 链路追踪
-	io, err := hy_tracer.InitTracer(imName.RpcImGateway, c.Trace.Addr)
+	io, err := hy_tracer.InitTracer(imName.RpcImGroup, c.Trace.Addr)
 	if err != nil {
 		log.Fatalf("init tracer err (%v)", err)
 	}
@@ -82,9 +82,9 @@ func Run(f string) {
 	}
 	msgDao := message.NewGroupMsgOperator(imbase.MongodbRoom, hyMongo)
 	cacheDao := cache.NewCacheOperator(hyRedis)
-	roomHandler := handler.Handler{CacheDao: cacheDao, GroupMsgDao: msgDao}
-	if err := innerPt.RegisterImRoomHandler(srv.Server(), &roomHandler); err != nil {
-		log.Fatalf("register login srv handler err (%v)", err)
+	groupHandler := handler.Handler{CacheDao: cacheDao, GroupMsgDao: msgDao}
+	if err := innerPt.RegisterImGroupHandler(srv.Server(), &groupHandler); err != nil {
+		log.Fatalf("register group srv handler err (%v)", err)
 	}
 
 	// 运行

@@ -68,7 +68,7 @@ func Run(f string) {
 	roomManager := connectionmanger.NewRoomConnectionManager()
 	cl := client.DefaultClient
 	loginRpc := inner.NewImLoginService(imName.RpcImLogin, cl)
-	roomRpc := inner.NewImRoomService(imName.RpcImRoom, cl)
+	roomRpc := inner.NewImRoomService(imName.RpcImGroup, cl)
 	opts := &imhandler.Options{
 		LoginCli:     loginRpc,
 		GroupCli:     roomRpc,

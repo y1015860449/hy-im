@@ -33,7 +33,7 @@ func NewService(conf *conf.Config) micro.Service {
 
 	// 创建服务，除了服务名，其它选项可加可不加，比如Version版本号、Metadata元数据等
 	srv := micro.NewService(
-		micro.Name(imName.RpcImRoom),
+		micro.Name(imName.RpcImGroup),
 		micro.Version(conf.Micro.Version),
 		micro.RegisterTTL(time.Duration(conf.Micro.RegisterTTL)*time.Second),
 		micro.RegisterInterval(time.Duration(conf.Micro.RegisterInterval)*time.Second),
