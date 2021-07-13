@@ -82,7 +82,7 @@ func Run(f string) {
 	}
 	msgDao := message.NewP2pMsgOperator(imbase.MongodbRoom, hyMongo)
 	cacheDao := cache.NewCacheOperator(hyRedis)
-	p2pHandler := handler.Handler{CacheDao: cacheDao, GroupMsgDao: msgDao}
+	p2pHandler := handler.Handler{CacheDao: cacheDao, P2pMsgDao: msgDao}
 	if err := innerPt.RegisterImP2PHandler(srv.Server(), &p2pHandler); err != nil {
 		log.Fatalf("register login srv handler err (%v)", err)
 	}

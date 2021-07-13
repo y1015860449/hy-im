@@ -6,56 +6,90 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/y1015860449/go-tools/hymongodb"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"hy-im/im/im-common/imbase"
 	"sort"
 	"sync"
 )
 
-type roomMsgOperator struct {
+type p2pMsgOperator struct {
 	mCli *hymongodb.HyMongo
 	dbName string
 	collections map[string]interface{}
 	collLock sync.RWMutex
 }
 
-func (r *roomMsgOperator) InsertP2pMsg(userId int64, loginType int32, msg *P2pMsg) error {
-	collName := getP2pCollName(msg.FromId)
-	if _, err := r.checkAndCreateP2pColl(collName); err != nil {
+func (p *p2pMsgOperator) InsertP2pMsg(userId int64, loginType int32, msg *P2pMsg) error {
+	fromColl := getP2pCollName(userId)
+	if _, err := p.checkAndCreateP2pColl(fromColl); err != nil {
 		return err
 	}
-	if _, err := r.mCli.InsertOne(r.dbName, collName, getP2pMsgBson(msg)); err != nil && err.Error() != "ErrorDuplicateKey" {
+
+	toColl := getP2pCollName(msg.ToId)
+	if _, err := p.checkAndCreateP2pColl(toColl); err != nil {
+		return err
+	}
+
+	if _, err := p.mCli.InsertOne(p.dbName, toColl, getP2pMsgBson(msg)); err != nil && err.Error() != "ErrorDuplicateKey" {
+		return err
+	}
+
+	if loginType == imbase.LoginApp {
+		msg.AppPulled = 1
+	} else {
+		msg.PcPulled = 1
+	}
+	if _, err := p.mCli.InsertOne(p.dbName, fromColl, getP2pMsgBson(msg)); err != nil && err.Error() != "ErrorDuplicateKey" {
+		return err
+	}
+
+	return nil
+}
+
+func (p *p2pMsgOperator) InsertP2pMsgList(userId int64, msgList []P2pMsg) error {
+	collName := getP2pCollName(userId)
+	if _, err := p.checkAndCreateP2pColl(collName); err != nil {
+		return err
+	}
+	if _, err := p.mCli.InsertMany(p.dbName, collName, getP2pMsgListBson(msgList)); err != nil && err.Error() != "ErrorDuplicateKey" {
 		return err
 	}
 	return nil
 }
 
-func (r *roomMsgOperator) InsertP2pMsgList(userId int64, msgList []P2pMsg) error {
+func (p *p2pMsgOperator) UpdateP2pMsgPulled(userId int64, loginType int32, msgIds []primitive.ObjectID) error {
 	collName := getP2pCollName(userId)
-	if _, err := r.checkAndCreateP2pColl(collName); err != nil {
+	if _, err := p.checkAndCreateP2pColl(collName); err != nil {
 		return err
 	}
-	if _, err := r.mCli.InsertMany(r.dbName, collName, getP2pMsgListBson(msgList)); err != nil && err.Error() != "ErrorDuplicateKey" {
-		return err
+	filter := bson.M{"_id": bson.M{"$in": msgIds}}
+	update := bson.M{}
+	if loginType == imbase.LoginApp {
+		update["appPulled"] = bson.M{"$set": 1}
+	} else {
+		update["pcPulled"] = bson.M{"$set": 1}
 	}
-	return nil
+	_, _, err := p.mCli.Update(p.dbName, collName, filter, update, true)
+	return err
 }
 
-func (r *roomMsgOperator) FindP2pMsg(userId int64, clientMsgId string) (*P2pMsg, error) {
+func (p *p2pMsgOperator) FindP2pMsg(userId int64, clientMsgId string) (*P2pMsg, error) {
 	collName := getP2pCollName(userId)
-	if _, err := r.checkAndCreateP2pColl(collName); err != nil {
+	if _, err := p.checkAndCreateP2pColl(collName); err != nil {
 		return nil, err
 	}
-	result, err := r.mCli.FindOne(r.dbName, collName, getP2pMsgKey(userId, clientMsgId), nil)
+	result, err := p.mCli.FindOne(p.dbName, collName, getP2pMsgKey(userId, clientMsgId), nil)
 	if err != nil {
 		return nil, err
 	}
 	return parseGroupMsg(result)
 }
 
-func (r *roomMsgOperator) FindP2pMsgListByLimit(userId int64, baseIndex string, limit int64, direction int32) ([]P2pMsg, error) {
+func (p *p2pMsgOperator) FindP2pMsgListByLimit(userId int64, baseIndex string, limit int64, direction int32) ([]P2pMsg, error) {
 	collName := getP2pCollName(userId)
-	if _, err := r.checkAndCreateP2pColl(collName); err != nil {
+	if _, err := p.checkAndCreateP2pColl(collName); err != nil {
 		return nil, err
 	}
 	opt := options.Find().SetLimit(limit)
@@ -63,20 +97,20 @@ func (r *roomMsgOperator) FindP2pMsgListByLimit(userId int64, baseIndex string, 
 	if direction == 1 {
 		opt = opt.SetSort(bson.M{"_id": 1})
 	}
-	cursor, err := r.mCli.Find(r.dbName, collName, getP2pMsgByLimitKey(baseIndex, direction), opt)
+	cursor, err := p.mCli.Find(p.dbName, collName, getP2pMsgByLimitKey(baseIndex, direction), opt)
 	if err != nil {
 		return nil, err
 	}
 	return parseP2pMsgList(cursor)
 }
 
-func (r *roomMsgOperator) FindP2pOfflineMsg(userId int64, loginType int32) ([]P2pMsg, error) {
+func (p *p2pMsgOperator) FindP2pOfflineMsg(userId int64, loginType int32) ([]P2pMsg, error) {
 	// 查询扩散数据
 	dCollName := getP2pCollName(userId)
-	if _, err := r.checkAndCreateP2pColl(dCollName); err != nil {
+	if _, err := p.checkAndCreateP2pColl(dCollName); err != nil {
 		return nil, err
 	}
-	result, err := r.mCli.Find(r.dbName, dCollName, getOfflineP2pMsgKey(userId, loginType), nil)
+	result, err := p.mCli.Find(p.dbName, dCollName, getOfflineP2pMsgKey(userId, loginType), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +118,7 @@ func (r *roomMsgOperator) FindP2pOfflineMsg(userId int64, loginType int32) ([]P2
 }
 
 func NewP2pMsgOperator(dbName string, mCli *hymongodb.HyMongo) P2pMsgDao {
-	opr := roomMsgOperator{}
+	opr := p2pMsgOperator{}
 	opr.dbName = dbName
 	opr.mCli = mCli
 	opr.collections = make(map[string]interface{}, 0)
@@ -97,7 +131,7 @@ func NewP2pMsgOperator(dbName string, mCli *hymongodb.HyMongo) P2pMsgDao {
 	return &opr
 }
 
-func (r *roomMsgOperator) checkCollection(collName string) (bool, error) {
+func (r *p2pMsgOperator) checkCollection(collName string) (bool, error) {
 	r.collLock.RLock()
 	if _, ok := r.collections[collName]; ok {
 		r.collLock.RUnlock()
@@ -117,13 +151,13 @@ func (r *roomMsgOperator) checkCollection(collName string) (bool, error) {
 	return false, nil
 }
 
-func (r *roomMsgOperator) addCollection(collName string) {
+func (r *p2pMsgOperator) addCollection(collName string) {
 	r.collLock.Lock()
 	r.collections[collName] = 1
 	r.collLock.Unlock()
 }
 
-func (r *roomMsgOperator) createP2pCollAndIndex(collName string) error {
+func (r *p2pMsgOperator) createP2pCollAndIndex(collName string) error {
 	mIndex := func() []mongo.IndexModel {
 		flag := true
 		return []mongo.IndexModel{
@@ -140,7 +174,7 @@ func (r *roomMsgOperator) createP2pCollAndIndex(collName string) error {
 	return r.createCollAndIndex(collName, mIndex)
 }
 
-func (r *roomMsgOperator) createCollAndIndex(collName string, mIndex func() []mongo.IndexModel) error {
+func (r *p2pMsgOperator) createCollAndIndex(collName string, mIndex func() []mongo.IndexModel) error {
 	indexes := mIndex()
 	_, err := r.mCli.CreateCollectionIndex(r.dbName, collName, indexes)
 	if err == nil {
@@ -149,7 +183,7 @@ func (r *roomMsgOperator) createCollAndIndex(collName string, mIndex func() []mo
 	return err
 }
 
-func (r *roomMsgOperator) checkAndCreateP2pColl(collName string) (bool, error) {
+func (r *p2pMsgOperator) checkAndCreateP2pColl(collName string) (bool, error) {
 	create := func(collName string) error {
 		if err := r.createP2pCollAndIndex(collName); err != nil {
 			return err
@@ -159,7 +193,7 @@ func (r *roomMsgOperator) checkAndCreateP2pColl(collName string) (bool, error) {
 	return r.checkAndCreateColl(collName, create)
 }
 
-func (r *roomMsgOperator) checkAndCreateColl(collName string, create func(collName string) error) (bool, error) {
+func (r *p2pMsgOperator) checkAndCreateColl(collName string, create func(collName string) error) (bool, error) {
 	find, err := r.checkCollection(collName)
 	if err != nil {
 		return false, err

@@ -21,6 +21,7 @@ message p2pMsg {
 // cmd_p2p_msg_ack = 0x2002;
 // cmd_p2p_msg_notify_ack = 0x2005;
 // cmd_p2p_msg_read_ack = 0x2008;
+// cmd_p2p_msg_cancel_ack = 0x200c;
 ///////////////////////////////
 message p2pAck {
   int64 userId = 1;
@@ -34,6 +35,7 @@ message p2pAck {
 // cmd_p2p_msg_deliver_ack = 0x2003;
 // cmd_p2p_msg_notify_ack = 0x2005;
 // cmd_p2p_msg_read_deliver_ack = 0x2009;
+// cmd_p2p_msg_cancel_deliver_ack = 0x200d;
 /////////////////////////////////////
 message p2pDeliverAck {
   int64 userId = 1;
@@ -67,6 +69,22 @@ message p2pMsgRead {
   int64 msgTime = 6;
   bytes extend = 7;
 }
+
+////////////////////////////////////////
+// cmd_p2p_msg_cancel = 0x200b;   // 消息撤回
+// cmd_p2p_msg_cancel_deliver = 0x200e;
+////////////////////////////////////////
+message p2pMsgCancel {
+  int64 toId = 1;
+  int64 fromId = 2;
+  string clientMsgId = 3;
+  string msgId = 4;
+  string cancelMsgId = 5;     // 已读的消息Id
+  int64 msgTime = 6;
+  bytes extend = 7;
+}
+
+
 
 
 

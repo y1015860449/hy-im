@@ -17,8 +17,8 @@ import (
 )
 
 type Handler struct {
-	CacheDao    cache.CacheDao
-	GroupMsgDao message.P2pMsgDao
+	CacheDao  cache.CacheDao
+	P2pMsgDao message.P2pMsgDao
 }
 
 func (h *Handler) P2p(ctx context.Context, req *innerPt.P2PReq, rsp *innerPt.P2PRsp) error {
@@ -29,7 +29,13 @@ func (h *Handler) P2p(ctx context.Context, req *innerPt.P2PReq, rsp *innerPt.P2P
 	switch req.Command {
 	case int32(appPt.ImCmd_cmd_p2p_msg):
 		return h.P2pMsgHandler(req, rsp)
-	case int32(appPt.ImCmd_cmd_p2p_msg_deliver_ack):
+	case int32(appPt.ImCmd_cmd_p2p_msg_read):
+		return h.P2pMsgReadHandler(req, rsp)
+	case int32(appPt.ImCmd_cmd_p2p_msg_cancel):
+		return h.P2pMsgCancelHandler(req, rsp)
+	case int32(appPt.ImCmd_cmd_p2p_msg_deliver_ack),
+	int32(appPt.ImCmd_cmd_p2p_msg_cancel_deliver_ack),
+	int32(appPt.ImCmd_cmd_p2p_msg_read_deliver_ack):
 		return h.P2pMsgDeliverAckHandler(req, rsp)
 	default:
 		packageP2pResponse(req, rsp, "", "", int32(innerPt.SrvErr_srv_err_param), int32(appPt.ImErrCode_err_param_except), req.Command)
@@ -46,13 +52,14 @@ func (h *Handler) P2pMsgHandler(req *innerPt.P2PReq, rsp *innerPt.P2PRsp) error 
 
 	if msg.FromId != req.UserId {
 		packageP2pResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_param), int32(appPt.ImErrCode_err_param_except), int32(appPt.ImCmd_cmd_p2p_msg_ack))
+		return nil
 	}
 
 	// todo 好友状态判断
 
 	serverId := ""
 	if req.Retry == 1 {
-		if rest, err := h.GroupMsgDao.FindP2pMsg(msg.FromId, msg.ClientMsgId); err != nil {
+		if rest, err := h.P2pMsgDao.FindP2pMsg(msg.FromId, msg.ClientMsgId); err != nil {
 			log.Errorf("find p2p msg err(%+v)", err)
 			packageP2pResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_server_except), int32(appPt.ImCmd_cmd_p2p_msg_ack))
 			return err
@@ -79,7 +86,7 @@ func (h *Handler) P2pMsgHandler(req *innerPt.P2PReq, rsp *innerPt.P2PRsp) error 
 			CreateTime:  msg.MsgTime,
 		}
 
-		if err := h.GroupMsgDao.InsertP2pMsg(req.UserId, req.LoginType, p2pMsg); err != nil {
+		if err := h.P2pMsgDao.InsertP2pMsg(req.UserId, req.LoginType, p2pMsg); err != nil {
 			log.Errorf("insert p2p msg err(%+v)", err)
 			packageP2pResponse(req, rsp, msg.ClientMsgId, serverId, int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_server_except), int32(appPt.ImCmd_cmd_p2p_msg_ack))
 			return err
@@ -98,11 +105,47 @@ func (h *Handler) P2pMsgHandler(req *innerPt.P2PReq, rsp *innerPt.P2PRsp) error 
 	return nil
 }
 
+func (h *Handler) P2pMsgReadHandler(req *innerPt.P2PReq, rsp *innerPt.P2PRsp) error {
+	var msg appPt.P2PMsgRead
+	if err := proto.Unmarshal(req.Content, &msg); err != nil {
+		packageP2pResponse(req, rsp, "", "", int32(innerPt.SrvErr_srv_err_param), int32(appPt.ImErrCode_err_param_except), int32(appPt.ImCmd_cmd_p2p_msg_read_ack))
+		return err
+	}
+
+	if msg.FromId != req.UserId {
+		packageP2pResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_param), int32(appPt.ImErrCode_err_param_except), int32(appPt.ImCmd_cmd_p2p_msg_read_ack))
+	}
+	return nil
+}
+
+func (h *Handler) P2pMsgCancelHandler(req *innerPt.P2PReq, rsp *innerPt.P2PRsp) error {
+	var msg appPt.P2PMsgCancel
+	if err := proto.Unmarshal(req.Content, &msg); err != nil {
+		packageP2pResponse(req, rsp, "", "", int32(innerPt.SrvErr_srv_err_param), int32(appPt.ImErrCode_err_param_except), int32(appPt.ImCmd_cmd_p2p_msg_cancel_ack))
+		return err
+	}
+
+	if msg.FromId != req.UserId {
+		packageP2pResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_param), int32(appPt.ImErrCode_err_param_except), int32(appPt.ImCmd_cmd_p2p_msg_cancel_ack))
+	}
+
+	return nil
+}
+
 func (h *Handler) P2pMsgDeliverAckHandler(req *innerPt.P2PReq, rsp *innerPt.P2PRsp) error {
-	//var msg appPt.RoomDeliverAck
-	//if err := proto.Unmarshal(req.Content, &msg); err != nil {
-	//	return err
-	//}
+	var msg appPt.P2PDeliverAck
+	if err := proto.Unmarshal(req.Content, &msg); err != nil {
+		return err
+	}
+	if msg.FromId != req.UserId {
+		packageP2pResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_param), int32(appPt.ImErrCode_err_param_except), 0)
+		return nil
+	}
+	oid, _ := primitive.ObjectIDFromHex(msg.MsgId)
+	if err := h.P2pMsgDao.UpdateP2pMsgPulled(msg.UserId, req.LoginType, []primitive.ObjectID{oid}); err != nil {
+		packageP2pResponse(req, rsp, "", "", int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_server_except), 0)
+		return err
+	}
 	packageP2pResponse(req, rsp, "", "", int32(innerPt.SrvErr_srv_err_success), int32(appPt.ImErrCode_err_success), 0)
 	return nil
 }
