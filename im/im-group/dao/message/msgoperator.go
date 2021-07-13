@@ -133,7 +133,7 @@ func (r *roomMsgOperator) FindGroupOfflineMsg(userId int64, loginType int32, gro
 	return parseGroupMsgList(rst)
 }
 
-func NewRoomMsgOperator(dbName string, mCli *hymongodb.HyMongo) GroupMsgDao {
+func NewGroupMsgOperator(dbName string, mCli *hymongodb.HyMongo) GroupMsgDao {
 	opr := roomMsgOperator{}
 	opr.dbName = dbName
 	opr.mCli = mCli

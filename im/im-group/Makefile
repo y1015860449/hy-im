@@ -4,7 +4,7 @@ GOPATH:=$(shell go env GOPATH)
 
 .PHONY: build
 build:
-	GO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o  im-room *.go
+	GO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o  im-group *.go
 
 .PHONY: test
 test:
@@ -12,11 +12,11 @@ test:
 
 .PHONY: docker
 docker: build
-	docker build . -t im-room:latest
+	docker build . -t im-group:latest
 
 .PHONY: run-docker
 run-docker:
-	docker build . -t im-room:latest
-	docker rm -f im-room | echo "remove ok"
-	docker run -d --name im-room im-room
+	docker build . -t im-group:latest
+	docker rm -f im-group | echo "remove ok"
+	docker run -d --name im-group im-group
 	docker ps

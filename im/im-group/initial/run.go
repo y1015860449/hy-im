@@ -80,7 +80,7 @@ func Run(f string) {
 	if err != nil {
 		log.Fatalf("init mongodb err (%v)", err)
 	}
-	msgDao := message.NewRoomMsgOperator(imbase.MongodbRoom, hyMongo)
+	msgDao := message.NewGroupMsgOperator(imbase.MongodbRoom, hyMongo)
 	cacheDao := cache.NewCacheOperator(hyRedis)
 	roomHandler := handler.Handler{CacheDao: cacheDao, GroupMsgDao: msgDao}
 	if err := innerPt.RegisterImRoomHandler(srv.Server(), &roomHandler); err != nil {
