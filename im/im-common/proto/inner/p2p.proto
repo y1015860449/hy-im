@@ -1,0 +1,25 @@
+// protoc --proto_path=. --micro_out=. --go_out=. *.proto
+
+syntax = "proto3";
+
+package inner;
+
+message p2pReq {
+  int64 userId = 1;
+  int32 loginType = 2;
+  int32 command = 3;
+  bytes content = 4;
+  int32 retry = 5;
+}
+
+message p2pRsp {
+  int64 userId = 1;
+  int32 loginType = 2;
+  int32 command = 3;
+  bytes content = 4;
+  int32 svcErr = 5;
+}
+
+service ImP2p{
+  rpc P2p(p2pReq) returns (p2pRsp);
+}

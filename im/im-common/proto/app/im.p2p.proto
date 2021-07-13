@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package im.app;
+////////////////////////////
+// cmd_p2p_msg = 0x2001;
+// cmd_p2p_msg_deliver = 0x2004;
+///////////////////////////
+message p2pMsg {
+  int64 toId = 1;       // 接受者
+  int64 fromId = 2;     // 发送者
+  int32 priority = 3;   // 优先级
+  string clientMsgId = 4;     // 消息ID-客户端唯一
+  string msgId = 5;  // 服务端生成的消息ID-顺序递增且全局唯一
+  int32 encrypt = 6;    // 加密类型 0 不加密 1 base64 2 AES  3 RSA
+  bytes content = 7;    // 消息内容
+  int64 msgTime = 8;  // 发送时间
+  bytes extend = 9;     // 扩展字段
+}
+
+///////////////////////////////
+// cmd_p2p_msg_ack = 0x2002;
+// cmd_p2p_msg_notify_ack = 0x2005;
+// cmd_p2p_msg_read_ack = 0x2008;
+///////////////////////////////
+message p2pAck {
+  int64 userId = 1;
+  string clientMsgId = 2;
+  string msgId = 3;
+  int64 msgTime = 4;
+  int32 errCode = 5;
+}
+
+/////////////////////////////////////
+// cmd_p2p_msg_deliver_ack = 0x2003;
+// cmd_p2p_msg_notify_ack = 0x2005;
+// cmd_p2p_msg_read_deliver_ack = 0x2009;
+/////////////////////////////////////
+message p2pDeliverAck {
+  int64 userId = 1;
+  int64 fromId = 2;
+  string clientMsgId = 3;
+  string msgId = 4;
+}
+
+////////////////////////////////
+// cmd_p2p_msg_notify = 0x2006;     // 消息已接受通知（服务器发送）
+////////////////////////////////
+message p2pMsgNotify {
+  int64 toId = 1;
+  int64 fromId = 2;
+  string clientMsgId = 3;
+  string msgId = 4;
+  int64 msgTime = 5;
+  string notifyId = 6;    // 已接收消息Id
+}
+
+//////////////////////////////
+// cmd_p2p_msg_read = 0x2007;   // 消息已读
+// cmd_p2p_msg_read_deliver = 0x200a;
+//////////////////////////////
+message p2pMsgRead {
+  int64 toId = 1;
+  int64 fromId = 2;
+  string clientMsgId = 3;
+  string msgId = 4;
+  repeated string msgIds = 5;     // 已读的消息Id
+  int64 msgTime = 6;
+  bytes extend = 7;
+}
+
+
+
