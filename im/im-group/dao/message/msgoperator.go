@@ -14,50 +14,50 @@ import (
 	"sync"
 )
 
-type roomMsgOperator struct {
+type groupMsgOperator struct {
 	mCli *hymongodb.HyMongo
 	dbName string
 	collections map[string]interface{}
 	collLock sync.RWMutex
 }
 
-func (r *roomMsgOperator) InsertGroupMsg(groupId int64, msg *GroupMsg) error {
+func (g *groupMsgOperator) InsertGroupMsg(groupId int64, msg *GroupMsg) error {
 	collName := getGroupCollName(groupId)
-	if _, err := r.checkAndCreateGroupColl(collName); err != nil {
+	if _, err := g.checkAndCreateGroupColl(collName); err != nil {
 		return err
 	}
-	if _, err := r.mCli.InsertOne(r.dbName, collName, getGroupMsgBson(msg)); err != nil && err.Error() != "ErrorDuplicateKey" {
+	if _, err := g.mCli.InsertOne(g.dbName, collName, getGroupMsgBson(msg)); err != nil && err.Error() != "ErrorDuplicateKey" {
 		return err
 	}
 	return nil
 }
 
-func (r *roomMsgOperator) InsertGroupMsgList(groupId int64, msgList []GroupMsg) error {
+func (g *groupMsgOperator) InsertGroupMsgList(groupId int64, msgList []GroupMsg) error {
 	collName := getGroupCollName(groupId)
-	if _, err := r.checkAndCreateGroupColl(collName); err != nil {
+	if _, err := g.checkAndCreateGroupColl(collName); err != nil {
 		return err
 	}
-	if _, err := r.mCli.InsertMany(r.dbName, collName, getGroupMsgListBson(msgList)); err != nil && err.Error() != "ErrorDuplicateKey" {
+	if _, err := g.mCli.InsertMany(g.dbName, collName, getGroupMsgListBson(msgList)); err != nil && err.Error() != "ErrorDuplicateKey" {
 		return err
 	}
 	return nil
 }
 
-func (r *roomMsgOperator) FindGroupMsg(groupId, userId int64, clientMsgId string) (*GroupMsg, error) {
+func (g *groupMsgOperator) FindGroupMsg(groupId, userId int64, clientMsgId string) (*GroupMsg, error) {
 	collName := getGroupCollName(groupId)
-	if _, err := r.checkAndCreateGroupColl(collName); err != nil {
+	if _, err := g.checkAndCreateGroupColl(collName); err != nil {
 		return nil, err
 	}
-	result, err := r.mCli.FindOne(r.dbName, collName, getGroupMsgKey(userId, clientMsgId), nil)
+	result, err := g.mCli.FindOne(g.dbName, collName, getGroupMsgKey(userId, clientMsgId), nil)
 	if err != nil {
 		return nil, err
 	}
 	return parseGroupMsg(result)
 }
 
-func (r *roomMsgOperator) FindGroupMsgListByLimit(groupId int64, baseIndex string, limit int64, direction int32) ([]GroupMsg, error) {
+func (g *groupMsgOperator) FindGroupMsgListByLimit(groupId int64, baseIndex string, limit int64, direction int32) ([]GroupMsg, error) {
 	collName := getGroupCollName(groupId)
-	if _, err := r.checkAndCreateGroupColl(collName); err != nil {
+	if _, err := g.checkAndCreateGroupColl(collName); err != nil {
 		return nil, err
 	}
 	opt := options.Find().SetLimit(limit)
@@ -65,7 +65,7 @@ func (r *roomMsgOperator) FindGroupMsgListByLimit(groupId int64, baseIndex strin
 	if direction == 1 {
 		opt = opt.SetSort(bson.M{"_id": 1})
 	}
-	cursor, err := r.mCli.Find(r.dbName, collName, getGroupMsgByLimitKey(baseIndex, direction), opt)
+	cursor, err := g.mCli.Find(g.dbName, collName, getGroupMsgByLimitKey(baseIndex, direction), opt)
 	if err != nil {
 		return nil, err
 	}
@@ -73,14 +73,14 @@ func (r *roomMsgOperator) FindGroupMsgListByLimit(groupId int64, baseIndex strin
 }
 
 // todo 这个方法使用事务才比较合理
-func (r *roomMsgOperator) InsertDiffusesGroupMsg(fromId int64, loginType int32, members []int64, msg *DiffusesGroupMsg, groupMsg *GroupMsg) error {
-	if err := r.InsertGroupMsg(groupMsg.GroupId, groupMsg); err != nil {
+func (g *groupMsgOperator) InsertDiffusesGroupMsg(fromId int64, loginType int32, members []int64, msg *DiffusesGroupMsg, groupMsg *GroupMsg) error {
+	if err := g.InsertGroupMsg(groupMsg.GroupId, groupMsg); err != nil {
 		return err
 	}
 	dBson := getDiffusesMsgBson(msg)
 	for _, v := range members{
 		collName := getDiffusesCollName(v)
-		if _, err := r.checkAndCreateDiffusesColl(collName); err != nil {
+		if _, err := g.checkAndCreateDiffusesColl(collName); err != nil {
 			return err
 		}
 		if v == fromId {
@@ -89,11 +89,11 @@ func (r *roomMsgOperator) InsertDiffusesGroupMsg(fromId int64, loginType int32, 
 			} else {
 				msg.PcPulled = 1
 			}
-			if _, err := r.mCli.InsertOne(r.dbName, collName, getDiffusesMsgBson(msg)); err != nil && err.Error() != "ErrorDuplicateKey" {
+			if _, err := g.mCli.InsertOne(g.dbName, collName, getDiffusesMsgBson(msg)); err != nil && err.Error() != "ErrorDuplicateKey" {
 				return err
 			}
 		} else {
-			if _, err := r.mCli.InsertOne(r.dbName, collName, dBson); err != nil && err.Error() != "ErrorDuplicateKey" {
+			if _, err := g.mCli.InsertOne(g.dbName, collName, dBson); err != nil && err.Error() != "ErrorDuplicateKey" {
 				return err
 			}
 		}
@@ -101,13 +101,13 @@ func (r *roomMsgOperator) InsertDiffusesGroupMsg(fromId int64, loginType int32, 
 	return nil
 }
 
-func (r *roomMsgOperator) FindGroupOfflineMsg(userId int64, loginType int32, groupId int64) ([]GroupMsg, error) {
+func (g *groupMsgOperator) FindGroupOfflineMsg(userId int64, loginType int32, groupId int64) ([]GroupMsg, error) {
 	// 查询扩散数据
 	dCollName := getDiffusesCollName(userId)
-	if _, err := r.checkAndCreateDiffusesColl(dCollName); err != nil {
+	if _, err := g.checkAndCreateDiffusesColl(dCollName); err != nil {
 		return nil, err
 	}
-	result, err := r.mCli.Find(r.dbName, dCollName, getOfflineGroupMsgKey(userId, loginType, groupId), nil)
+	result, err := g.mCli.Find(g.dbName, dCollName, getOfflineGroupMsgKey(userId, loginType, groupId), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (r *roomMsgOperator) FindGroupOfflineMsg(userId int64, loginType int32, gro
 
 	// 查询原始数据
 	gCollName := getGroupCollName(groupId)
-	if _, err := r.checkAndCreateGroupColl(gCollName); err != nil {
+	if _, err := g.checkAndCreateGroupColl(gCollName); err != nil {
 		return nil, err
 	}
 	var ids []primitive.ObjectID
@@ -126,7 +126,7 @@ func (r *roomMsgOperator) FindGroupOfflineMsg(userId int64, loginType int32, gro
 		ids = append(ids, v.Oid)
 	}
 	filter := bson.M{"_oid": bson.M{"$in": ids}}
-	rst, err := r.mCli.Find(r.dbName, gCollName, filter, nil)
+	rst, err := g.mCli.Find(g.dbName, gCollName, filter, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +134,7 @@ func (r *roomMsgOperator) FindGroupOfflineMsg(userId int64, loginType int32, gro
 }
 
 func NewGroupMsgOperator(dbName string, mCli *hymongodb.HyMongo) GroupMsgDao {
-	opr := roomMsgOperator{}
+	opr := groupMsgOperator{}
 	opr.dbName = dbName
 	opr.mCli = mCli
 	opr.collections = make(map[string]interface{}, 0)
@@ -147,33 +147,33 @@ func NewGroupMsgOperator(dbName string, mCli *hymongodb.HyMongo) GroupMsgDao {
 	return &opr
 }
 
-func (r *roomMsgOperator) checkCollection(collName string) (bool, error) {
-	r.collLock.RLock()
-	if _, ok := r.collections[collName]; ok {
-		r.collLock.RUnlock()
+func (g *groupMsgOperator) checkCollection(collName string) (bool, error) {
+	g.collLock.RLock()
+	if _, ok := g.collections[collName]; ok {
+		g.collLock.RUnlock()
 		return true, nil
 	}
-	r.collLock.RUnlock()
+	g.collLock.RUnlock()
 
-	has, err := r.mCli.HasCollection(r.dbName, collName)
+	has, err := g.mCli.HasCollection(g.dbName, collName)
 	if err != nil {
 		log.Errorf("mongodb is broken")
 		return false, err
 	}
 	if has {
-		r.addCollection(collName)
+		g.addCollection(collName)
 		return true, nil
 	}
 	return false, nil
 }
 
-func (r *roomMsgOperator) addCollection(collName string) {
-	r.collLock.Lock()
-	r.collections[collName] = 1
-	r.collLock.Unlock()
+func (g *groupMsgOperator) addCollection(collName string) {
+	g.collLock.Lock()
+	g.collections[collName] = 1
+	g.collLock.Unlock()
 }
 
-func (r *roomMsgOperator) createGroupCollAndIndex(collName string) error {
+func (g *groupMsgOperator) createGroupCollAndIndex(collName string) error {
 	mIndex := func() []mongo.IndexModel {
 		flag := true
 		return []mongo.IndexModel{
@@ -187,10 +187,10 @@ func (r *roomMsgOperator) createGroupCollAndIndex(collName string) error {
 			},
 		}
 	}
-	return r.createCollAndIndex(collName, mIndex)
+	return g.createCollAndIndex(collName, mIndex)
 }
 
-func (r *roomMsgOperator) createDiffusesCollAndIndex(collName string) error {
+func (g *groupMsgOperator) createDiffusesCollAndIndex(collName string) error {
 	mIndex := func() []mongo.IndexModel {
 		flag := true
 		return []mongo.IndexModel{
@@ -200,40 +200,40 @@ func (r *roomMsgOperator) createDiffusesCollAndIndex(collName string) error {
 			},
 		}
 	}
-	return r.createCollAndIndex(collName, mIndex)
+	return g.createCollAndIndex(collName, mIndex)
 }
 
-func (r *roomMsgOperator) createCollAndIndex(collName string, mIndex func() []mongo.IndexModel) error {
+func (g *groupMsgOperator) createCollAndIndex(collName string, mIndex func() []mongo.IndexModel) error {
 	indexes := mIndex()
-	_, err := r.mCli.CreateCollectionIndex(r.dbName, collName, indexes)
+	_, err := g.mCli.CreateCollectionIndex(g.dbName, collName, indexes)
 	if err == nil {
-		r.addCollection(collName)
+		g.addCollection(collName)
 	}
 	return err
 }
 
-func (r *roomMsgOperator) checkAndCreateGroupColl(collName string) (bool, error) {
+func (g *groupMsgOperator) checkAndCreateGroupColl(collName string) (bool, error) {
 	create := func(collName string) error {
-		if err := r.createGroupCollAndIndex(collName); err != nil {
+		if err := g.createGroupCollAndIndex(collName); err != nil {
 			return err
 		}
 		return nil
 	}
-	return r.checkAndCreateColl(collName, create)
+	return g.checkAndCreateColl(collName, create)
 }
 
-func (r *roomMsgOperator) checkAndCreateDiffusesColl(collName string) (bool, error) {
+func (g *groupMsgOperator) checkAndCreateDiffusesColl(collName string) (bool, error) {
 	create := func(collName string) error {
-		if err := r.createDiffusesCollAndIndex(collName); err != nil {
+		if err := g.createDiffusesCollAndIndex(collName); err != nil {
 			return err
 		}
 		return nil
 	}
-	return r.checkAndCreateColl(collName, create)
+	return g.checkAndCreateColl(collName, create)
 }
 
-func (r *roomMsgOperator) checkAndCreateColl(collName string, create func(collName string) error) (bool, error) {
-	find, err := r.checkCollection(collName)
+func (g *groupMsgOperator) checkAndCreateColl(collName string, create func(collName string) error) (bool, error) {
+	find, err := g.checkCollection(collName)
 	if err != nil {
 		return false, err
 	}
