@@ -33,15 +33,15 @@ var _ context.Context
 var _ client.Option
 var _ server.Option
 
-// Api Endpoints for ApiUser service
+// Api Endpoints for ApiGroup service
 
-func NewApiUserEndpoints() []*api.Endpoint {
+func NewApiGroupEndpoints() []*api.Endpoint {
 	return []*api.Endpoint{}
 }
 
-// Client API for ApiUser service
+// Client API for ApiGroup service
 
-type ApiUserService interface {
+type ApiGroupService interface {
 	CreateGroup(ctx context.Context, in *CreateGroupReq, opts ...client.CallOption) (*CreateGroupRsp, error)
 	DismissGroup(ctx context.Context, in *DismissGroupReq, opts ...client.CallOption) (*DismissGroupRsp, error)
 	ChangeGroupMaster(ctx context.Context, in *ChangeGroupMasterReq, opts ...client.CallOption) (*ChangeGroupMasterRsp, error)
@@ -52,20 +52,20 @@ type ApiUserService interface {
 	GetGroupList(ctx context.Context, in *GetGroupListReq, opts ...client.CallOption) (*GetGroupListRsp, error)
 }
 
-type apiUserService struct {
+type apiGroupService struct {
 	c    client.Client
 	name string
 }
 
-func NewApiUserService(name string, c client.Client) ApiUserService {
-	return &apiUserService{
+func NewApiGroupService(name string, c client.Client) ApiGroupService {
+	return &apiGroupService{
 		c:    c,
 		name: name,
 	}
 }
 
-func (c *apiUserService) CreateGroup(ctx context.Context, in *CreateGroupReq, opts ...client.CallOption) (*CreateGroupRsp, error) {
-	req := c.c.NewRequest(c.name, "ApiUser.CreateGroup", in)
+func (c *apiGroupService) CreateGroup(ctx context.Context, in *CreateGroupReq, opts ...client.CallOption) (*CreateGroupRsp, error) {
+	req := c.c.NewRequest(c.name, "ApiGroup.CreateGroup", in)
 	out := new(CreateGroupRsp)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -74,8 +74,8 @@ func (c *apiUserService) CreateGroup(ctx context.Context, in *CreateGroupReq, op
 	return out, nil
 }
 
-func (c *apiUserService) DismissGroup(ctx context.Context, in *DismissGroupReq, opts ...client.CallOption) (*DismissGroupRsp, error) {
-	req := c.c.NewRequest(c.name, "ApiUser.DismissGroup", in)
+func (c *apiGroupService) DismissGroup(ctx context.Context, in *DismissGroupReq, opts ...client.CallOption) (*DismissGroupRsp, error) {
+	req := c.c.NewRequest(c.name, "ApiGroup.DismissGroup", in)
 	out := new(DismissGroupRsp)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -84,8 +84,8 @@ func (c *apiUserService) DismissGroup(ctx context.Context, in *DismissGroupReq, 
 	return out, nil
 }
 
-func (c *apiUserService) ChangeGroupMaster(ctx context.Context, in *ChangeGroupMasterReq, opts ...client.CallOption) (*ChangeGroupMasterRsp, error) {
-	req := c.c.NewRequest(c.name, "ApiUser.ChangeGroupMaster", in)
+func (c *apiGroupService) ChangeGroupMaster(ctx context.Context, in *ChangeGroupMasterReq, opts ...client.CallOption) (*ChangeGroupMasterRsp, error) {
+	req := c.c.NewRequest(c.name, "ApiGroup.ChangeGroupMaster", in)
 	out := new(ChangeGroupMasterRsp)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -94,8 +94,8 @@ func (c *apiUserService) ChangeGroupMaster(ctx context.Context, in *ChangeGroupM
 	return out, nil
 }
 
-func (c *apiUserService) AddGroupMember(ctx context.Context, in *AddGroupMemberReq, opts ...client.CallOption) (*AddGroupMemberRsp, error) {
-	req := c.c.NewRequest(c.name, "ApiUser.AddGroupMember", in)
+func (c *apiGroupService) AddGroupMember(ctx context.Context, in *AddGroupMemberReq, opts ...client.CallOption) (*AddGroupMemberRsp, error) {
+	req := c.c.NewRequest(c.name, "ApiGroup.AddGroupMember", in)
 	out := new(AddGroupMemberRsp)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -104,8 +104,8 @@ func (c *apiUserService) AddGroupMember(ctx context.Context, in *AddGroupMemberR
 	return out, nil
 }
 
-func (c *apiUserService) RemoveGroupMember(ctx context.Context, in *RemoveGroupMemberReq, opts ...client.CallOption) (*RemoveGroupMemberRsp, error) {
-	req := c.c.NewRequest(c.name, "ApiUser.RemoveGroupMember", in)
+func (c *apiGroupService) RemoveGroupMember(ctx context.Context, in *RemoveGroupMemberReq, opts ...client.CallOption) (*RemoveGroupMemberRsp, error) {
+	req := c.c.NewRequest(c.name, "ApiGroup.RemoveGroupMember", in)
 	out := new(RemoveGroupMemberRsp)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -114,8 +114,8 @@ func (c *apiUserService) RemoveGroupMember(ctx context.Context, in *RemoveGroupM
 	return out, nil
 }
 
-func (c *apiUserService) QuitGroupMember(ctx context.Context, in *QuitGroupMemberReq, opts ...client.CallOption) (*QuitGroupMemberRsp, error) {
-	req := c.c.NewRequest(c.name, "ApiUser.QuitGroupMember", in)
+func (c *apiGroupService) QuitGroupMember(ctx context.Context, in *QuitGroupMemberReq, opts ...client.CallOption) (*QuitGroupMemberRsp, error) {
+	req := c.c.NewRequest(c.name, "ApiGroup.QuitGroupMember", in)
 	out := new(QuitGroupMemberRsp)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -124,8 +124,8 @@ func (c *apiUserService) QuitGroupMember(ctx context.Context, in *QuitGroupMembe
 	return out, nil
 }
 
-func (c *apiUserService) GetGroupInfo(ctx context.Context, in *GetGroupInfoReq, opts ...client.CallOption) (*GetGroupInfoRsp, error) {
-	req := c.c.NewRequest(c.name, "ApiUser.GetGroupInfo", in)
+func (c *apiGroupService) GetGroupInfo(ctx context.Context, in *GetGroupInfoReq, opts ...client.CallOption) (*GetGroupInfoRsp, error) {
+	req := c.c.NewRequest(c.name, "ApiGroup.GetGroupInfo", in)
 	out := new(GetGroupInfoRsp)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -134,8 +134,8 @@ func (c *apiUserService) GetGroupInfo(ctx context.Context, in *GetGroupInfoReq, 
 	return out, nil
 }
 
-func (c *apiUserService) GetGroupList(ctx context.Context, in *GetGroupListReq, opts ...client.CallOption) (*GetGroupListRsp, error) {
-	req := c.c.NewRequest(c.name, "ApiUser.GetGroupList", in)
+func (c *apiGroupService) GetGroupList(ctx context.Context, in *GetGroupListReq, opts ...client.CallOption) (*GetGroupListRsp, error) {
+	req := c.c.NewRequest(c.name, "ApiGroup.GetGroupList", in)
 	out := new(GetGroupListRsp)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -144,9 +144,9 @@ func (c *apiUserService) GetGroupList(ctx context.Context, in *GetGroupListReq, 
 	return out, nil
 }
 
-// Server API for ApiUser service
+// Server API for ApiGroup service
 
-type ApiUserHandler interface {
+type ApiGroupHandler interface {
 	CreateGroup(context.Context, *CreateGroupReq, *CreateGroupRsp) error
 	DismissGroup(context.Context, *DismissGroupReq, *DismissGroupRsp) error
 	ChangeGroupMaster(context.Context, *ChangeGroupMasterReq, *ChangeGroupMasterRsp) error
@@ -157,8 +157,8 @@ type ApiUserHandler interface {
 	GetGroupList(context.Context, *GetGroupListReq, *GetGroupListRsp) error
 }
 
-func RegisterApiUserHandler(s server.Server, hdlr ApiUserHandler, opts ...server.HandlerOption) error {
-	type apiUser interface {
+func RegisterApiGroupHandler(s server.Server, hdlr ApiGroupHandler, opts ...server.HandlerOption) error {
+	type apiGroup interface {
 		CreateGroup(ctx context.Context, in *CreateGroupReq, out *CreateGroupRsp) error
 		DismissGroup(ctx context.Context, in *DismissGroupReq, out *DismissGroupRsp) error
 		ChangeGroupMaster(ctx context.Context, in *ChangeGroupMasterReq, out *ChangeGroupMasterRsp) error
@@ -168,45 +168,45 @@ func RegisterApiUserHandler(s server.Server, hdlr ApiUserHandler, opts ...server
 		GetGroupInfo(ctx context.Context, in *GetGroupInfoReq, out *GetGroupInfoRsp) error
 		GetGroupList(ctx context.Context, in *GetGroupListReq, out *GetGroupListRsp) error
 	}
-	type ApiUser struct {
-		apiUser
+	type ApiGroup struct {
+		apiGroup
 	}
-	h := &apiUserHandler{hdlr}
-	return s.Handle(s.NewHandler(&ApiUser{h}, opts...))
+	h := &apiGroupHandler{hdlr}
+	return s.Handle(s.NewHandler(&ApiGroup{h}, opts...))
 }
 
-type apiUserHandler struct {
-	ApiUserHandler
+type apiGroupHandler struct {
+	ApiGroupHandler
 }
 
-func (h *apiUserHandler) CreateGroup(ctx context.Context, in *CreateGroupReq, out *CreateGroupRsp) error {
-	return h.ApiUserHandler.CreateGroup(ctx, in, out)
+func (h *apiGroupHandler) CreateGroup(ctx context.Context, in *CreateGroupReq, out *CreateGroupRsp) error {
+	return h.ApiGroupHandler.CreateGroup(ctx, in, out)
 }
 
-func (h *apiUserHandler) DismissGroup(ctx context.Context, in *DismissGroupReq, out *DismissGroupRsp) error {
-	return h.ApiUserHandler.DismissGroup(ctx, in, out)
+func (h *apiGroupHandler) DismissGroup(ctx context.Context, in *DismissGroupReq, out *DismissGroupRsp) error {
+	return h.ApiGroupHandler.DismissGroup(ctx, in, out)
 }
 
-func (h *apiUserHandler) ChangeGroupMaster(ctx context.Context, in *ChangeGroupMasterReq, out *ChangeGroupMasterRsp) error {
-	return h.ApiUserHandler.ChangeGroupMaster(ctx, in, out)
+func (h *apiGroupHandler) ChangeGroupMaster(ctx context.Context, in *ChangeGroupMasterReq, out *ChangeGroupMasterRsp) error {
+	return h.ApiGroupHandler.ChangeGroupMaster(ctx, in, out)
 }
 
-func (h *apiUserHandler) AddGroupMember(ctx context.Context, in *AddGroupMemberReq, out *AddGroupMemberRsp) error {
-	return h.ApiUserHandler.AddGroupMember(ctx, in, out)
+func (h *apiGroupHandler) AddGroupMember(ctx context.Context, in *AddGroupMemberReq, out *AddGroupMemberRsp) error {
+	return h.ApiGroupHandler.AddGroupMember(ctx, in, out)
 }
 
-func (h *apiUserHandler) RemoveGroupMember(ctx context.Context, in *RemoveGroupMemberReq, out *RemoveGroupMemberRsp) error {
-	return h.ApiUserHandler.RemoveGroupMember(ctx, in, out)
+func (h *apiGroupHandler) RemoveGroupMember(ctx context.Context, in *RemoveGroupMemberReq, out *RemoveGroupMemberRsp) error {
+	return h.ApiGroupHandler.RemoveGroupMember(ctx, in, out)
 }
 
-func (h *apiUserHandler) QuitGroupMember(ctx context.Context, in *QuitGroupMemberReq, out *QuitGroupMemberRsp) error {
-	return h.ApiUserHandler.QuitGroupMember(ctx, in, out)
+func (h *apiGroupHandler) QuitGroupMember(ctx context.Context, in *QuitGroupMemberReq, out *QuitGroupMemberRsp) error {
+	return h.ApiGroupHandler.QuitGroupMember(ctx, in, out)
 }
 
-func (h *apiUserHandler) GetGroupInfo(ctx context.Context, in *GetGroupInfoReq, out *GetGroupInfoRsp) error {
-	return h.ApiUserHandler.GetGroupInfo(ctx, in, out)
+func (h *apiGroupHandler) GetGroupInfo(ctx context.Context, in *GetGroupInfoReq, out *GetGroupInfoRsp) error {
+	return h.ApiGroupHandler.GetGroupInfo(ctx, in, out)
 }
 
-func (h *apiUserHandler) GetGroupList(ctx context.Context, in *GetGroupListReq, out *GetGroupListRsp) error {
-	return h.ApiUserHandler.GetGroupList(ctx, in, out)
+func (h *apiGroupHandler) GetGroupList(ctx context.Context, in *GetGroupListReq, out *GetGroupListRsp) error {
+	return h.ApiGroupHandler.GetGroupList(ctx, in, out)
 }

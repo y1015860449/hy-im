@@ -75,7 +75,7 @@ func Run(f string) {
 	// todo 连接mysql
 
 	groupHandler := handler.Handler{}
-	if err := innerPt.RegisterApiUserHandler(srv.Server(), &groupHandler); err != nil {
+	if err := innerPt.RegisterApiGroupHandler(srv.Server(), &groupHandler); err != nil {
 		log.Fatalf("register login srv handler err (%v)", err)
 	}
 

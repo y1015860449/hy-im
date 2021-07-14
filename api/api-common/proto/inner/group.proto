@@ -115,7 +115,7 @@ message GetGroupListRsp {
     int32 svcErr = 4;
 }
 
-service ApiUser{
+service ApiGroup{
   rpc CreateGroup(CreateGroupReq) returns (CreateGroupRsp);  // 創建群
   rpc DismissGroup(DismissGroupReq) returns (DismissGroupRsp);   // 解散群
   rpc ChangeGroupMaster(ChangeGroupMasterReq) returns (ChangeGroupMasterRsp);    // 轉讓群組

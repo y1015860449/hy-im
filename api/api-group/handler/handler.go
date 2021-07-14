@@ -3,13 +3,11 @@ package handler
 import (
 	"context"
 	innerPt "hy-im/api/api-common/proto/inner"
-	"hy-im/api/api-group/conf"
 	"hy-im/api/api-group/dao/db/group"
 )
 
 type Handler struct {
-	userDao   group.ImGroupDao
-	tokenConf *conf.Token
+	groupDao group.ImGroupDao
 }
 
 func (h *Handler) CreateGroup(ctx context.Context, req *innerPt.CreateGroupReq, rsp *innerPt.CreateGroupRsp) error {
