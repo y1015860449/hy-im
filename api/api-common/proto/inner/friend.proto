@@ -1,0 +1,78 @@
+// protoc --proto_path=. --micro_out=. --go_out=. *.proto
+
+syntax = "proto3";
+
+package inner;
+
+message BecomeFriendReq {
+     int64 userId = 1;
+     int64 FriendId = 2;
+
+}
+
+message BecomeFriendRsp {
+    int64 userId = 1;
+    int64 FriendId = 2;
+    string secretKey = 3;
+    int32 svcErr = 4;
+}
+
+message DeleteFriendReq {
+    int64 userId = 1;
+    int64 FriendId = 2;
+}
+
+message DeleteFriendRsp {
+    int64 userId = 1;
+    int64 FriendId = 2;
+    int32 svcErr = 3;
+}
+
+message BlackFriendReq {
+    int64 userId = 1;
+    int64 FriendId = 2;
+}
+
+message BlackFriendRsp {
+    int64 userId = 1;
+    int64 FriendId = 2;
+    int32 svcErr = 3;
+}
+
+message GetFriendListReq {
+    int64 userId = 1;
+}
+
+message FriendInfo {
+    int64 friendId = 1;
+    int32 status = 2;
+    string secretKey = 3;
+}
+
+message GetFriendListRsp {
+    int64 userId = 1;
+    repeated FriendInfo list = 2;
+    int32 svcErr = 3;
+}
+
+message GetFriendInfoReq {
+    int64 userId = 1;
+    int64 FriendId = 2;
+}
+
+message GetFriendInfoRsp {
+    int64 userId = 1;
+    int64 friendId = 2;
+    int32 status = 3;
+    string secretKey = 4;
+    int32 svcErr = 5;
+}
+
+service ApiFriend{
+  rpc BecomeFriend(BecomeFriendReq) returns (BecomeFriendRsp);  // 成为好友
+  rpc DeleteFriend(DeleteFriendReq) returns (DeleteFriendRsp);   // 删除好友
+  rpc BlackFriend(BlackFriendReq) returns (BlackFriendRsp);    // 拉黑好友
+
+  rpc GetFriendList(GetFriendListReq) returns (GetFriendListRsp);    // 獲取好友列表
+  rpc GetFriendInfo(GetFriendInfoReq) returns (GetFriendInfoRsp);    // 獲取群組成員
+}
