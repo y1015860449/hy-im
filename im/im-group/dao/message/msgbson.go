@@ -7,7 +7,7 @@ import (
 
 func getGroupMsgBson(msg *GroupMsg) interface{} {
 	return bson.M{"_id": msg.Oid, "command": msg.Command, "groupId": msg.GroupId,
-		"fromId": msg.FromId, "clientMsgId": msg.ClientMsgId, "content": msg.Content, "createTime": msg.CreateTime}
+		"fromId": msg.FromId, "clientMsgId": msg.ClientMsgId, "content": msg.Content, "isCancel": msg.IsCancel, "createTime": msg.CreateTime}
 }
 
 func getGroupMsgListBson(msgList []GroupMsg) []interface{} {

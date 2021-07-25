@@ -43,12 +43,26 @@ func (g *groupMsgOperator) InsertGroupMsgList(groupId int64, msgList []GroupMsg)
 	return nil
 }
 
-func (g *groupMsgOperator) FindGroupMsg(groupId, userId int64, clientMsgId string) (*GroupMsg, error) {
+func (g *groupMsgOperator) FindGroupMsgByClientMsgId(groupId, userId int64, clientMsgId string) (*GroupMsg, error) {
 	collName := getGroupCollName(groupId)
 	if _, err := g.checkAndCreateGroupColl(collName); err != nil {
 		return nil, err
 	}
 	result, err := g.mCli.FindOne(g.dbName, collName, getGroupMsgKey(userId, clientMsgId), nil)
+	if err != nil {
+		return nil, err
+	}
+	return parseGroupMsg(result)
+}
+
+func (g *groupMsgOperator) FindGroupMsg(groupId int64, msgId string) (*GroupMsg, error) {
+	collName := getGroupCollName(groupId)
+	if _, err := g.checkAndCreateGroupColl(collName); err != nil {
+		return nil, err
+	}
+	oid, _ := primitive.ObjectIDFromHex(msgId)
+	filter := bson.M{"_id": oid}
+	result, err := g.mCli.FindOne(g.dbName, collName, filter, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -70,6 +84,34 @@ func (g *groupMsgOperator) FindGroupMsgListByLimit(groupId int64, baseIndex stri
 		return nil, err
 	}
 	return parseGroupMsgList(cursor)
+}
+
+func (g *groupMsgOperator) UpdateGroupMsgCancel(groupId int64, msgId string) error {
+	collName := getGroupCollName(groupId)
+	if _, err := g.checkAndCreateGroupColl(collName); err != nil {
+		return err
+	}
+	oid, _ := primitive.ObjectIDFromHex(msgId)
+	filter := bson.M{"_id": oid}
+	update := bson.M{"$set": bson.M{"isCancel": 1}}
+	_, _, err := g.mCli.Update(g.dbName, collName, filter, update, false)
+	return err
+}
+
+func (g *groupMsgOperator) UpdateP2pMsgPulled(userId int64, loginType int32, msgIds []primitive.ObjectID) error {
+	dCollName := getDiffusesCollName(userId)
+	if _, err := g.checkAndCreateDiffusesColl(dCollName); err != nil {
+		return err
+	}
+	filter := bson.M{"_id": bson.M{"$in": msgIds}}
+	update := bson.M{}
+	if loginType == imbase.LoginApp {
+		update["appPulled"] = bson.M{"$set": 1}
+	} else {
+		update["pcPulled"] = bson.M{"$set": 1}
+	}
+	_, _, err := g.mCli.Update(g.dbName, dCollName, filter, update, true)
+	return err
 }
 
 // todo 这个方法使用事务才比较合理

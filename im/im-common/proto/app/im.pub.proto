@@ -43,6 +43,11 @@ enum ImCmd {
     cmd_group_close_ack = 0x1016;
     cmd_group_close_deliver = 0x1018;
     cmd_group_close_deliver_ack = 0x1017;
+    // 群组消息撤回
+    cmd_group_msg_cancel = 0x1019;
+    cmd_group_msg_cancel_ack = 0x101a;
+    cmd_group_msg_cancel_deliver = 0x101c;
+    cmd_group_msg_cancel_deliver_ack = 0x101b;
 
     cmd_p2p_msg = 0x2001;    // 发送消息
     cmd_p2p_msg_ack = 0x2002;

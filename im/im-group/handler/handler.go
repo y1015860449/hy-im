@@ -29,6 +29,8 @@ func (h *Handler) Group(ctx context.Context, req *innerPt.GroupReq, rsp *innerPt
 	switch req.Command {
 	case int32(appPt.ImCmd_cmd_group_msg):
 		return h.GroupMsgHandler(req, rsp)
+	case int32(appPt.ImCmd_cmd_group_msg_cancel):
+		return h.GroupMsgCancelHandler(req, rsp)
 	case int32(appPt.ImCmd_cmd_group_open),
 		int32(appPt.ImCmd_cmd_group_join),
 		int32(appPt.ImCmd_cmd_group_quit),
@@ -79,7 +81,7 @@ func (h *Handler) GroupMsgHandler(req *innerPt.GroupReq, rsp *innerPt.GroupRsp) 
 
 	serverId := ""
 	if req.Retry == 1 {
-		if rest, err := h.GroupMsgDao.FindGroupMsg(msg.GroupId, msg.FromId, msg.ClientMsgId); err != nil {
+		if rest, err := h.GroupMsgDao.FindGroupMsgByClientMsgId(msg.GroupId, msg.FromId, msg.ClientMsgId); err != nil {
 			log.Errorf("find group msg err(%+v)", err)
 			packageGroupResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_server_except), int32(appPt.ImCmd_cmd_group_msg_ack))
 			return err
@@ -134,6 +136,114 @@ func (h *Handler) GroupMsgHandler(req *innerPt.GroupReq, rsp *innerPt.GroupRsp) 
 	_ = pushMsg
 
 	packageGroupResponse(req, rsp, msg.ClientMsgId, serverId, int32(innerPt.SrvErr_srv_err_success), int32(appPt.ImErrCode_err_success), int32(appPt.ImCmd_cmd_group_msg_ack))
+	return nil
+}
+
+func (h *Handler) GroupMsgCancelHandler(req *innerPt.GroupReq, rsp *innerPt.GroupRsp) error {
+	// 游客身份不能发送消息
+	if req.RoleType == imbase.RoleVisitor {
+		packageGroupResponse(req, rsp, "", "", int32(innerPt.SrvErr_srv_err_visitor), int32(appPt.ImErrCode_err_user_visitor), int32(appPt.ImCmd_cmd_group_msg_cancel_ack))
+		return nil
+	}
+
+	var msg appPt.GroupMsgCancel
+	if err := proto.Unmarshal(req.Content, &msg); err != nil {
+		packageGroupResponse(req, rsp, "", "", int32(innerPt.SrvErr_srv_err_param), int32(appPt.ImErrCode_err_param_except), int32(appPt.ImCmd_cmd_group_msg_cancel_ack))
+		return err
+	}
+
+	if msg.GroupType == base.GroupTypeNormal || msg.GroupType == base.GroupTypeDiscussion {
+		if msg.FromId != req.UserId {
+			packageGroupResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_param), int32(appPt.ImErrCode_err_param_except), int32(appPt.ImCmd_cmd_group_msg_cancel_ack))
+			return nil
+		}
+	} else {
+		// 聊天室喝直播室
+		if msg.FromId != req.UserId || msg.GroupId != req.GroupId {
+			packageGroupResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_param), int32(appPt.ImErrCode_err_param_except), int32(appPt.ImCmd_cmd_group_msg_cancel_ack))
+			return nil
+		}
+	}
+
+	var members[]int64
+	if msg.GroupType == base.GroupTypeNormal || msg.GroupType == base.GroupTypeDiscussion {
+		// todo 获取群成员列表喝群成员状态信息
+	}
+
+	serverId := ""
+	if req.Retry == 1 {
+		if rest, err := h.GroupMsgDao.FindGroupMsgByClientMsgId(msg.GroupId, msg.FromId, msg.ClientMsgId); err != nil {
+			log.Errorf("find group msg err(%+v)", err)
+			packageGroupResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_server_except), int32(appPt.ImCmd_cmd_group_msg_cancel_ack))
+			return err
+		} else {
+			serverId = rest.Oid.String()
+		}
+	}
+	// todo 不是发送者
+	if srcMsg, err := h.GroupMsgDao.FindGroupMsg(msg.GroupId, msg.CancelMsgId); err != nil {
+		packageGroupResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_server_except), int32(appPt.ImCmd_cmd_group_msg_cancel_ack))
+		return err
+	} else {
+		if msg.FromId != srcMsg.FromId {
+			packageGroupResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_param), int32(appPt.ImErrCode_err_param_except), int32(appPt.ImCmd_cmd_group_msg_cancel_ack))
+			return nil
+		}
+	}
+
+	// todo 更新标记位
+	if err := h.GroupMsgDao.UpdateGroupMsgCancel(msg.GroupId, msg.CancelMsgId); err != nil {
+		packageGroupResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_server_except), int32(appPt.ImCmd_cmd_group_msg_cancel_ack))
+		return err
+	}
+
+	// 重传消息不二次保存，直接推送
+	var data []byte
+	if len(serverId) <= 0 {
+		serverId = objid.GetObjectId(imbase.SessionTypeGroup, req.GroupId)
+		oid, _ := primitive.ObjectIDFromHex(serverId)
+		msg.MsgId = serverId
+		msg.MsgTime = hy_utils.GetMillisecond()
+		data, _ = proto.Marshal(&msg)
+		gMsg := &message.GroupMsg{
+			Oid:         oid,
+			Command:     int32(appPt.ImCmd_cmd_group_msg_cancel_deliver),
+			GroupId:     msg.GroupId,
+			FromId:      msg.FromId,
+			ClientMsgId: msg.ClientMsgId,
+			Content:     data,
+			CreateTime:  msg.MsgTime,
+		}
+		if msg.GroupType == base.GroupTypeNormal || msg.GroupType == base.GroupTypeDiscussion {
+			dMsg := &message.DiffusesGroupMsg{
+				Oid:       oid,
+				Command:   int32(appPt.ImCmd_cmd_group_msg_cancel_deliver),
+				GroupId:   msg.GroupId,
+				FromId:    msg.FromId,
+			}
+			if err := h.GroupMsgDao.InsertDiffusesGroupMsg(msg.FromId, req.LoginType, members, dMsg, gMsg); err != nil {
+				log.Errorf("insert group msg err(%+v)", err)
+				packageGroupResponse(req, rsp, msg.ClientMsgId, serverId, int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_server_except), int32(appPt.ImCmd_cmd_group_msg_ack))
+				return err
+			}
+		} else {		// 聊天室、直播
+			if err := h.GroupMsgDao.InsertGroupMsg(msg.GroupId, gMsg); err != nil {
+				log.Errorf("insert group msg err(%+v)", err)
+				packageGroupResponse(req, rsp, msg.ClientMsgId, serverId, int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_server_except), int32(appPt.ImCmd_cmd_group_msg_ack))
+				return err
+			}
+		}
+	}
+	// todo 在线转发, 不同的类型发送到不同的topic
+	pushMsg := &mqPt.PushGroupMsg{
+		Command: int32(appPt.ImCmd_cmd_group_msg_cancel_deliver),
+		GroupId: msg.GroupId,
+		Content: data,
+		UserId:  msg.FromId,
+	}
+	_ = pushMsg
+
+	packageGroupResponse(req, rsp, msg.ClientMsgId, serverId, int32(innerPt.SrvErr_srv_err_success), int32(appPt.ImErrCode_err_success), int32(appPt.ImCmd_cmd_group_msg_cancel_ack))
 	return nil
 }
 
@@ -196,11 +306,22 @@ func (h *Handler) GroupOperatorHandler(req *innerPt.GroupReq, rsp *innerPt.Group
 }
 
 func (h *Handler) GroupMsgDeliverAckHandler(req *innerPt.GroupReq, rsp *innerPt.GroupRsp) error {
-	//var msg appPt.RoomDeliverAck
-	//if err := proto.Unmarshal(req.Content, &msg); err != nil {
-	//	return err
-	//}
-	// 不处理，直接成功，此消息客户端可以不发送
+	var msg appPt.GroupDeliverAck
+	if err := proto.Unmarshal(req.Content, &msg); err != nil {
+		return err
+	}
+	if msg.GroupType == base.GroupTypeNormal || msg.GroupType == base.GroupTypeDiscussion {
+		var oIds []primitive.ObjectID
+		for _, value := range msg.MsgIds {
+			oid, _ := primitive.ObjectIDFromHex(value)
+			oIds = append(oIds, oid)
+		}
+		if err := h.GroupMsgDao.UpdateP2pMsgPulled(msg.UserId, req.LoginType, oIds); err != nil {
+			packageGroupResponse(req, rsp, "", "", int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_success), 0)
+			return err
+		}
+	}
+	//不处理，直接成功，此消息客户端可以不发送
 	packageGroupResponse(req, rsp, "", "", int32(innerPt.SrvErr_srv_err_success), int32(appPt.ImErrCode_err_success), 0)
 	return nil
 }
