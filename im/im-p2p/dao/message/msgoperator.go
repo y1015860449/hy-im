@@ -75,12 +75,47 @@ func (p *p2pMsgOperator) UpdateP2pMsgPulled(userId int64, loginType int32, msgId
 	return err
 }
 
-func (p *p2pMsgOperator) FindP2pMsg(userId int64, clientMsgId string) (*P2pMsg, error) {
+func (p *p2pMsgOperator) UpdateP2pMsgCancel(userId, toId int64, msgId primitive.ObjectID) error {
+	fromColl := getP2pCollName(userId)
+	if _, err := p.checkAndCreateP2pColl(fromColl); err != nil {
+		return err
+	}
+
+	toColl := getP2pCollName(toId)
+	if _, err := p.checkAndCreateP2pColl(toColl); err != nil {
+		return err
+	}
+
+	filter := bson.M{"_id": msgId}
+	update := bson.M{"$set": bson.M{"isCancel": 1}}
+	_, _, err := p.mCli.Update(p.dbName, fromColl, filter, update, false)
+	if err != nil {
+		return err
+	}
+	_, _, err = p.mCli.Update(p.dbName, toColl, filter, update, false)
+	return err
+}
+
+func (p *p2pMsgOperator) FindP2pMsgByClientMsgId(userId int64, clientMsgId string) (*P2pMsg, error) {
 	collName := getP2pCollName(userId)
 	if _, err := p.checkAndCreateP2pColl(collName); err != nil {
 		return nil, err
 	}
 	result, err := p.mCli.FindOne(p.dbName, collName, getP2pMsgKey(userId, clientMsgId), nil)
+	if err != nil {
+		return nil, err
+	}
+	return parseGroupMsg(result)
+}
+
+func (p *p2pMsgOperator) FindP2pMsg(userId int64, msgId string) (*P2pMsg, error) {
+	collName := getP2pCollName(userId)
+	if _, err := p.checkAndCreateP2pColl(collName); err != nil {
+		return nil, err
+	}
+	oid, _ := primitive.ObjectIDFromHex(msgId)
+	filter := bson.M{"_id": oid}
+	result, err := p.mCli.FindOne(p.dbName, collName, filter, nil)
 	if err != nil {
 		return nil, err
 	}

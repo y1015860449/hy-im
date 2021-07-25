@@ -6,8 +6,8 @@ import (
 )
 
 func getP2pMsgBson(msg *P2pMsg) interface{} {
-	return bson.M{"_id": msg.Oid, "command": msg.Command, "groupId": msg.ToId, "fromId": msg.FromId, "clientMsgId": msg.ClientMsgId,
-							"content": msg.Content, "createTime": msg.CreateTime, "appPulled": msg.AppPulled, "pcPulled": msg.PcPulled}
+	return bson.M{"_id": msg.Oid, "command": msg.Command, "toId": msg.ToId, "fromId": msg.FromId, "clientMsgId": msg.ClientMsgId,
+							"content": msg.Content, "createTime": msg.CreateTime, "isCancel": msg.IsCancel, "appPulled": msg.AppPulled, "pcPulled": msg.PcPulled}
 }
 
 func getP2pMsgListBson(msgList []P2pMsg) []interface{} {

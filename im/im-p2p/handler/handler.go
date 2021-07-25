@@ -59,7 +59,7 @@ func (h *Handler) P2pMsgHandler(req *innerPt.P2PReq, rsp *innerPt.P2PRsp) error 
 
 	serverId := ""
 	if req.Retry == 1 {
-		if rest, err := h.P2pMsgDao.FindP2pMsg(msg.FromId, msg.ClientMsgId); err != nil {
+		if rest, err := h.P2pMsgDao.FindP2pMsgByClientMsgId(msg.FromId, msg.ClientMsgId); err != nil {
 			log.Errorf("find p2p msg err(%+v)", err)
 			packageP2pResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_server_except), int32(appPt.ImCmd_cmd_p2p_msg_ack))
 			return err
@@ -94,7 +94,7 @@ func (h *Handler) P2pMsgHandler(req *innerPt.P2PReq, rsp *innerPt.P2PRsp) error 
 	}
 	// todo 在线转发, 不同的类型发送到不同的topic
 	pushMsg := &mqPt.PushP2PMsg{
-		Command: int32(appPt.ImCmd_cmd_group_msg_deliver),
+		Command: int32(appPt.ImCmd_cmd_p2p_msg_deliver),
 		ToId: msg.ToId,
 		Content: data,
 		UserId:  msg.FromId,
@@ -115,6 +115,55 @@ func (h *Handler) P2pMsgReadHandler(req *innerPt.P2PReq, rsp *innerPt.P2PRsp) er
 	if msg.FromId != req.UserId {
 		packageP2pResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_param), int32(appPt.ImErrCode_err_param_except), int32(appPt.ImCmd_cmd_p2p_msg_read_ack))
 	}
+
+	// todo 好友状态判断
+
+	serverId := ""
+	if req.Retry == 1 {
+		if rest, err := h.P2pMsgDao.FindP2pMsgByClientMsgId(msg.FromId, msg.ClientMsgId); err != nil {
+			log.Errorf("find p2p msg err(%+v)", err)
+			packageP2pResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_server_except), int32(appPt.ImCmd_cmd_p2p_msg_read_ack))
+			return err
+		} else {
+			serverId = rest.Oid.String()
+		}
+	}
+
+	// 重传消息不二次保存，直接推送
+	var data []byte
+	if len(serverId) <= 0 {
+		chatId := utils.GetChatId(msg.FromId, msg.ToId)
+		serverId = objid.GetObjectId(imbase.SessionTypeP2p, chatId)
+		oid, _ := primitive.ObjectIDFromHex(serverId)
+		msg.MsgId = serverId
+		msg.MsgTime = hy_utils.GetMillisecond()
+		data, _ = proto.Marshal(&msg)
+		p2pMsg := &message.P2pMsg{
+			Oid:         oid,
+			Command:     int32(appPt.ImCmd_cmd_p2p_msg_read_deliver),
+			ToId:        msg.ToId,
+			FromId:      msg.FromId,
+			ClientMsgId: msg.ClientMsgId,
+			Content:     data,
+			CreateTime:  msg.MsgTime,
+		}
+
+		if err := h.P2pMsgDao.InsertP2pMsg(req.UserId, req.LoginType, p2pMsg); err != nil {
+			log.Errorf("insert p2p msg err(%+v)", err)
+			packageP2pResponse(req, rsp, msg.ClientMsgId, serverId, int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_server_except), int32(appPt.ImCmd_cmd_p2p_msg_read_ack))
+			return err
+		}
+	}
+	// todo 在线转发, 不同的类型发送到不同的topic
+	pushMsg := &mqPt.PushP2PMsg{
+		Command: int32(appPt.ImCmd_cmd_p2p_msg_deliver),
+		ToId: msg.ToId,
+		Content: data,
+		UserId:  msg.FromId,
+	}
+	_ = pushMsg
+
+	packageP2pResponse(req, rsp, msg.ClientMsgId, serverId, int32(innerPt.SrvErr_srv_err_success), int32(appPt.ImErrCode_err_success), int32(appPt.ImCmd_cmd_p2p_msg_read_ack))
 	return nil
 }
 
@@ -127,8 +176,69 @@ func (h *Handler) P2pMsgCancelHandler(req *innerPt.P2PReq, rsp *innerPt.P2PRsp) 
 
 	if msg.FromId != req.UserId {
 		packageP2pResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_param), int32(appPt.ImErrCode_err_param_except), int32(appPt.ImCmd_cmd_p2p_msg_cancel_ack))
+		return nil
 	}
 
+	serverId := ""
+	if req.Retry == 1 {
+		if rest, err := h.P2pMsgDao.FindP2pMsgByClientMsgId(msg.FromId, msg.ClientMsgId); err != nil {
+			log.Errorf("find p2p msg err(%+v)", err)
+			packageP2pResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_server_except), int32(appPt.ImCmd_cmd_p2p_msg_ack))
+			return err
+		} else {
+			serverId = rest.Oid.String()
+		}
+	}
+
+	// 是否发送者撤回消息
+	if srcMsg, err := h.P2pMsgDao.FindP2pMsgByClientMsgId(msg.FromId, msg.CancelMsgId); err != nil {
+		packageP2pResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_server_except), int32(appPt.ImCmd_cmd_p2p_msg_cancel_ack))
+		return err
+	} else {
+		if msg.FromId != srcMsg.FromId {
+			packageP2pResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_param), int32(appPt.ImErrCode_err_param_except), int32(appPt.ImCmd_cmd_p2p_msg_cancel_ack))
+			return nil
+		}
+	}
+
+	oId, _ := primitive.ObjectIDFromHex(msg.CancelMsgId)
+	if err := h.P2pMsgDao.UpdateP2pMsgCancel(msg.FromId, msg.ToId, oId); err != nil {
+		packageP2pResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_server_except), int32(appPt.ImCmd_cmd_p2p_msg_cancel_ack))
+		return err
+	}
+
+	var data []byte
+	if len(serverId) <= 0 {
+		chatId := utils.GetChatId(msg.FromId, msg.ToId)
+		serverId = objid.GetObjectId(imbase.SessionTypeP2p, chatId)
+		oid, _ := primitive.ObjectIDFromHex(serverId)
+		msg.MsgId = serverId
+		msg.MsgTime = hy_utils.GetMillisecond()
+		data, _ = proto.Marshal(&msg)
+		if err := h.P2pMsgDao.InsertP2pMsg(msg.FromId, req.LoginType, &message.P2pMsg{
+			Oid:         oid,
+			Command:     int32(appPt.ImCmd_cmd_p2p_msg_cancel_deliver),
+			ToId:        msg.FromId,
+			FromId:      msg.ToId,
+			ClientMsgId: msg.ClientMsgId,
+			Content:     data,
+			CreateTime:  hy_utils.GetMillisecond(),
+		}); err != nil {
+			packageP2pResponse(req, rsp, msg.ClientMsgId, "", int32(innerPt.SrvErr_srv_err_mongo), int32(appPt.ImErrCode_err_server_except), int32(appPt.ImCmd_cmd_p2p_msg_cancel_ack))
+			return err
+		}
+	}
+
+	// todo 在线转发, 不同的类型发送到不同的topic
+	pushMsg := &mqPt.PushP2PMsg{
+		Command: int32(appPt.ImCmd_cmd_p2p_msg_cancel_deliver),
+		ToId: msg.ToId,
+		Content: data,
+		UserId:  msg.FromId,
+	}
+	_ = pushMsg
+
+	packageP2pResponse(req, rsp, msg.ClientMsgId, serverId, int32(innerPt.SrvErr_srv_err_success), int32(appPt.ImErrCode_err_success), int32(appPt.ImCmd_cmd_p2p_msg_ack))
 	return nil
 }
 
