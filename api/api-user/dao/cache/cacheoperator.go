@@ -3,14 +3,14 @@ package cache
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/tal-tech/go-zero/core/stores/redis"
+	"github.com/y1015860449/go-tools/hyredis"
 )
 
 type CacheOperator struct {
-	redisCli *redis.Redis
+	redisCli *hyredis.HyRedis
 }
 
-var preTokenKey = "ic:token:%s"
+var preTokenKey = "hy:token:%s"
 
 func getTokenKey(token string) string {
 	return fmt.Sprintf(preTokenKey, token)
@@ -22,7 +22,7 @@ func (p *CacheOperator) SaveUserToken(loginToken string, info *UserTokenInfo, ex
 	if err != nil {
 		return err
 	}
-	return p.redisCli.Setex(key, string(data), int(expired))
+	return p.redisCli.SetEx(key, string(data), int(expired))
 }
 
 func (p *CacheOperator) GetUserToken(loginToken string) (*UserTokenInfo, error) {
@@ -40,11 +40,11 @@ func (p *CacheOperator) GetUserToken(loginToken string) (*UserTokenInfo, error) 
 
 func (p *CacheOperator) DeleteUserToken(loginToken string) error {
 	key := getTokenKey(loginToken)
-	_, err := p.redisCli.Del(key)
+	err := p.redisCli.Del(key)
 	return err
 }
 
-var prePcLogin = "ic:pcLogin:%s"
+var prePcLogin = "hy:pcLogin:%s"
 
 func getPcLoginKey(uniqueSign string) string {
 	return fmt.Sprintf(prePcLogin, uniqueSign)
@@ -56,7 +56,7 @@ func (p *CacheOperator) SavePcUniqueSignInfo(uniqueSign string, info *PcUniqueSi
 	if err != nil {
 		return err
 	}
-	return p.redisCli.Setex(key, string(data), int(expired))
+	return p.redisCli.SetEx(key, string(data), int(expired))
 }
 
 func (p *CacheOperator) GetPcUniqueSignInfo(uniqueSign string) (*PcUniqueSignInfo, error) {
@@ -75,6 +75,6 @@ func (p *CacheOperator) GetPcUniqueSignInfo(uniqueSign string) (*PcUniqueSignInf
 	return &info, err
 }
 
-func NewCacheOperator(redisCli *redis.Redis) CacheDao {
+func NewCacheOperator(redisCli *hyredis.HyRedis) CacheDao {
 	return &CacheOperator{redisCli: redisCli}
 }

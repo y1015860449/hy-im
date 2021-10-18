@@ -1,4 +1,4 @@
-package friend
+package db
 
 import "hy-im/api/api-friend/dao/db/model"
 

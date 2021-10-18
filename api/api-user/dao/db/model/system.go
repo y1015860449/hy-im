@@ -3,7 +3,7 @@ package model
 import "time"
 
 type AppVersion struct {
-	ID          uint32
+	Id          uint32
 	OsType      int8
 	AppVersion  string
 	DownloadUrl string
@@ -16,7 +16,7 @@ type AppVersion struct {
 }
 
 type SystemApp struct {
-	ID        uint32
+	Id        uint32
 	AppKey    int32
 	AppSecret string
 	AppName   string

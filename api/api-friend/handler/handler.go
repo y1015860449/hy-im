@@ -4,11 +4,11 @@ import (
 	"context"
 	innerPt "hy-im/api/api-common/proto/inner"
 	"hy-im/api/api-friend/conf"
-	"hy-im/api/api-friend/dao/db/friend"
+	"hy-im/api/api-friend/dao/db"
 )
 
 type Handler struct {
-	friendDao friend.ImFriendDao
+	friendDao db.ImFriendDao
 	tokenConf *conf.Token
 }
 
